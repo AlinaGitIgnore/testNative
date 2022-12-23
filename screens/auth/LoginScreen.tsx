@@ -60,7 +60,7 @@ export default function LoginScreen({ navigation }: LoginProps) {
   return (
     <TouchableWithoutFeedback onPress={keyboardHide}>
       <View style={styles.container}>
-        <LogoSVG width={68} height={90} />
+        <LogoSVG width={68} height={90} style={{ marginTop: 50 }} />
         <Text style={styles.title}>Log in to woorkroom</Text>
         <KeyboardAvoidingView
           behavior={Platform.OS == "ios" ? "padding" : "height"}
@@ -139,6 +139,7 @@ const styles = StyleSheet.create({
     lineHeight: 36,
     textTransform: "capitalize",
     color: "#1F1D1D",
+    marginTop: 110,
   },
   form: {
     width: "100%",

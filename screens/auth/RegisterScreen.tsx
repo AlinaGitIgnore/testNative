@@ -1,7 +1,8 @@
 import { useState } from "react";
-
 import React, { useEffect } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+
 import {
   TouchableOpacity,
   Image,
@@ -30,6 +31,7 @@ import EyeOpenSVG from "../../assets/eyeOpen.svg";
 import EyeCloseSVG from "../../assets/eyeClose.svg";
 
 const initialState = {
+  phone: "",
   name: "",
   email: "",
   password: "",
@@ -62,6 +64,7 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
   const [isShowPass, setIsShowPass] = useState(false);
   const [isShowConfPass, setIsShowConfPass] = useState(false);
 
+  const inputHandlerPhone = (text: string) => setState((prev) => ({ ...prev, phone: text }));
   const inputHandlerName = (text: string) => setState((prev) => ({ ...prev, name: text }));
   const inputHandlerEmail = (text: string) => setState((prev) => ({ ...prev, email: text }));
   const inputHandlerPass = (text: string) => setState((prev) => ({ ...prev, password: text }));
@@ -88,45 +91,60 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
     <SafeAreaView>
       <ScrollView style={styles.scrollView}>
         <TouchableWithoutFeedback onPress={keyboardHide}>
-          <View style={styles.container}>
-            <LogoSVG width={68} height={90} />
-            <Text style={styles.title}>Sign Up To woorkroom</Text>
-            <KeyboardAvoidingView
-              behavior={Platform.OS == "ios" ? "padding" : "height"}
-              style={{ width: "100%", marginTop: 50 }}
-            >
-              <View style={styles.form}>
-                <TouchableOpacity onPress={() => setIsOpen(!isOpen)}>
-                  <View style={styles.phoneCodeWrap}>
-                    <Text style={styles.selectValue}>{code}</Text>
-                    {
-                      <ArrowDownSVG
-                        width={10}
-                        height={5}
-                        style={[
-                          styles.openSelect,
-                          {
-                            transform: isOpen ? [{ rotate: "180deg" }] : [{ rotate: "0deg" }],
-                          },
-                        ]}
-                      />
-                    }
-                  </View>
-                </TouchableOpacity>
+          <KeyboardAwareScrollView style={{ width: "100%" }}>
+            <View style={styles.container}>
+              <LogoSVG width={68} height={90} style={{ marginTop: 50 }} />
+              <Text style={styles.title}>Sign Up To woorkroom</Text>
 
-                <View style={{ ...styles.selectList, display: isOpen ? "flex" : "none" }}>
-                  <View />
-                  {data.map((item, idx) => (
-                    <Text onPress={(e) => selectValue(e)} style={styles.item} key={idx}>
-                      {item.value}
-                    </Text>
-                  ))}
+              <View style={styles.form}>
+                <View style={styles.inputWrap}>
+                  <Text style={styles.label}>Your Phone</Text>
+                  <View style={styles.phoneInputWrap}>
+                    <TouchableOpacity onPress={() => setIsOpen(!isOpen)}>
+                      <View style={styles.phoneCodeWrap}>
+                        <Text style={styles.selectValue}>{code}</Text>
+                        {
+                          <ArrowDownSVG
+                            width={10}
+                            height={5}
+                            style={[
+                              styles.openSelect,
+                              {
+                                transform: isOpen ? [{ rotate: "180deg" }] : [{ rotate: "0deg" }],
+                              },
+                            ]}
+                          />
+                        }
+                      </View>
+                    </TouchableOpacity>
+                    <View style={{ ...styles.selectList, display: isOpen ? "flex" : "none" }}>
+                      <View />
+                      {data.map((item, idx) => (
+                        <Text onPress={(e) => selectValue(e)} style={styles.item} key={idx}>
+                          {item.value}
+                        </Text>
+                      ))}
+                    </View>
+                    <View style={styles.inputNumber}>
+                      <TextInput
+                        placeholder='345 567-23-56'
+                        keyboardType='numeric'
+                        style={styles.selectValue}
+                        textAlign='left'
+                        value={state.phone}
+                        onChangeText={inputHandlerPhone}
+                        onFocus={() => {
+                          setIsShowKeyboard(true);
+                        }}
+                      />
+                    </View>
+                  </View>
                 </View>
                 <View style={styles.inputWrap}>
                   <Text style={styles.label}>Your Name</Text>
                   <TextInput
                     style={styles.name}
-                    textAlign='center'
+                    textAlign='left'
                     value={state.name}
                     onChangeText={inputHandlerName}
                     onFocus={() => {
@@ -138,7 +156,7 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
                   <Text style={styles.label}>Your email</Text>
                   <TextInput
                     style={styles.email}
-                    textAlign='center'
+                    textAlign='left'
                     value={state.email}
                     onChangeText={inputHandlerEmail}
                     onFocus={() => {
@@ -204,16 +222,17 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
                   </Text>
                 </TouchableOpacity>
               </View>
-            </KeyboardAvoidingView>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("LoginScreen")}
-              style={styles.existUserWrap}
-            >
-              <Text style={styles.link}>
-                Have Account? <Text style={styles.loginLink}>Log In</Text>
-              </Text>
-            </TouchableOpacity>
-          </View>
+
+              <TouchableOpacity
+                onPress={() => navigation.navigate("LoginScreen")}
+                style={styles.existUserWrap}
+              >
+                <Text style={styles.link}>
+                  Have Account? <Text style={styles.loginLink}>Log In</Text>
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </KeyboardAwareScrollView>
         </TouchableWithoutFeedback>
       </ScrollView>
     </SafeAreaView>
@@ -238,11 +257,11 @@ const styles = StyleSheet.create({
     lineHeight: 36,
     textTransform: "capitalize",
     color: "#1F1D1D",
+    marginTop: 110,
   },
   form: {
     position: "relative",
     width: "100%",
-    marginBottom: 100,
   },
 
   phoneCodeWrap: {
@@ -268,7 +287,7 @@ const styles = StyleSheet.create({
     color: "#9795A4",
   },
   selectList: {
-    top: 50,
+    top: 55,
     left: 0,
     position: "absolute",
     borderColor: "#D7D7D7",
@@ -287,6 +306,28 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
+  phoneInputWrap: {
+    display: "flex",
+    flexDirection: "row",
+    alignContent: "center",
+    alignItems: "center",
+    marginTop: 15,
+  },
+
+  inputNumber: {
+    height: 48,
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#D7D7D7",
+    borderRadius: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    marginLeft: 25,
+    fontWeight: "500",
+    fontSize: 16,
+    lineHeight: 24,
+    color: "#9795A4",
+  },
   inputWrap: {
     position: "relative",
     width: "100%",
@@ -360,6 +401,7 @@ const styles = StyleSheet.create({
   existUserWrap: {
     alignSelf: "center",
     marginTop: 35,
+    marginBottom: 100,
   },
 
   link: {
