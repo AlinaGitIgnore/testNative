@@ -1,4 +1,3 @@
-import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import React, { useEffect } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -17,6 +16,7 @@ import {
   Keyboard,
   Alert,
   Dimensions,
+  StatusBar,
 } from "react-native";
 import { RootStackParamList } from "../../types";
 
@@ -116,7 +116,6 @@ export default function LoginScreen({ navigation }: LoginProps) {
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
-        <StatusBar style='auto' />
       </View>
     </TouchableWithoutFeedback>
   );
@@ -125,6 +124,7 @@ export default function LoginScreen({ navigation }: LoginProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: StatusBar.currentHeight,
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
