@@ -17,9 +17,14 @@ import {
   Dimensions,
   FlatList,
   GestureResponderEvent,
+  TouchableOpacityComponent,
 } from "react-native";
 import { RootStackParamList } from "../../types";
 import { MaterialIcons } from "@expo/vector-icons";
+import LogoSVG from "../../assets/logo.svg";
+import ArrowDownSVG from "../../assets/arrowDown.svg";
+import EyeOpenSVG from "../../assets/eyeOpen.svg";
+import EyeCloseSVG from "../../assets/eyeClose.svg";
 
 const initialState = {
   name: "",
@@ -51,6 +56,8 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
   const [state, setState] = useState(initialState);
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
   const [code, setCode] = useState("+1");
+  const [isShowPass, setIsShowPass] = useState(false);
+  const [isShowConfPass, setIsShowConfPass] = useState(false);
 
   const inputHandlerName = (text: string) => setState((prev) => ({ ...prev, name: text }));
   const inputHandlerEmail = (text: string) => setState((prev) => ({ ...prev, email: text }));
@@ -76,21 +83,31 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
   return (
     <TouchableWithoutFeedback onPress={keyboardHide}>
       <View style={styles.container}>
-        <Image
-          source={require("../../assets/logo.png")}
-          fadeDuration={0}
-          style={{ width: 68, height: 90 }}
-        />
+        <LogoSVG width={68} height={90} />
         <Text style={styles.title}>Sign Up To woorkroom</Text>
         <KeyboardAvoidingView
           behavior={Platform.OS == "ios" ? "padding" : "height"}
           style={{ width: "100%", marginTop: 50 }}
         >
           <View style={styles.form}>
-            <Text style={styles.selectValue} onPress={() => setIsOpen(!isOpen)}>
-              {code}
-              <MaterialIcons name='keyboard-arrow-down' size={20} color='#9795A4' />
-            </Text>
+            <TouchableOpacity onPress={() => setIsOpen(!isOpen)}>
+              <View style={styles.phoneCodeWrap}>
+                <Text style={styles.selectValue}>{code}</Text>
+                {
+                  <ArrowDownSVG
+                    width={10}
+                    height={5}
+                    style={[
+                      styles.openSelect,
+                      {
+                        transform: isOpen ? [{ rotate: "180deg" }] : [{ rotate: "0deg" }],
+                      },
+                    ]}
+                  />
+                }
+              </View>
+            </TouchableOpacity>
+
             <View style={{ ...styles.selectList, display: isOpen ? "flex" : "none" }}>
               <FlatList
                 data={data}
@@ -101,8 +118,7 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
                 )}
               />
             </View>
-
-            {/* <View style={styles.inputWrap}>
+            <View style={styles.inputWrap}>
               <Text style={styles.label}>Your Name</Text>
               <TextInput
                 style={styles.name}
@@ -139,6 +155,16 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
                   setIsShowKeyboard(true);
                 }}
               />
+              <TouchableOpacity
+                onPress={() => setIsShowPass(!isShowPass)}
+                style={{ position: "absolute", bottom: 10, right: 0 }}
+              >
+                {isShowPass ? (
+                  <EyeCloseSVG width={24} height={24} />
+                ) : (
+                  <EyeOpenSVG width={24} height={24} />
+                )}
+              </TouchableOpacity>
             </View>
             <View style={styles.inputWrap}>
               <Text style={styles.label}>Confirm Password</Text>
@@ -147,14 +173,23 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
                 style={styles.password}
                 textAlign='center'
                 secureTextEntry={true}
-                value={state.password}
+                value={state.confPassword}
                 onChangeText={inputHandlerConfPass}
                 onFocus={() => {
                   setIsShowKeyboard(true);
                 }}
               />
-            </View> */}
-
+              <TouchableOpacity
+                onPress={() => setIsShowConfPass(!isShowPass)}
+                style={{ position: "absolute", bottom: 10, right: 0 }}
+              >
+                {isShowConfPass ? (
+                  <EyeCloseSVG width={24} height={24} />
+                ) : (
+                  <EyeOpenSVG width={24} height={24} />
+                )}
+              </TouchableOpacity>
+            </View>
             <TouchableOpacity activeOpacity={0.8} onPress={() => {}} style={styles.loginSubmit}>
               <Text style={styles.submitTitle} onPress={onRegister}>
                 Next
@@ -198,7 +233,9 @@ const styles = StyleSheet.create({
     width: "100%",
     marginBottom: 100,
   },
-  selectValue: {
+
+  phoneCodeWrap: {
+    position: "relative",
     width: 70,
     height: 48,
     borderColor: "#D7D7D7",
@@ -206,6 +243,14 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingHorizontal: 15,
     paddingVertical: 12,
+  },
+
+  openSelect: {
+    position: "absolute",
+    top: 22,
+    right: 10,
+  },
+  selectValue: {
     fontWeight: "500",
     fontSize: 16,
     lineHeight: 24,
@@ -232,6 +277,7 @@ const styles = StyleSheet.create({
   },
 
   inputWrap: {
+    position: "relative",
     width: "100%",
     marginTop: 40,
   },

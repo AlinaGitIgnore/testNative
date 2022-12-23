@@ -2,10 +2,11 @@ import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import React, { useEffect } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-
+import EyeOpenSVG from "../../assets/eyeOpen.svg";
+import EyeCloseSVG from "../../assets/eyeClose.svg";
+import LogoSVG from "../../assets/logo.svg";
 import {
   TouchableOpacity,
-  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -41,6 +42,7 @@ export default function LoginScreen({ navigation }: LoginProps) {
 
   const [state, setState] = useState(initialState);
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+  const [isShowPass, setIsShowPass] = useState(false);
 
   const inputHandlerEmail = (text: string) => setState((prev) => ({ ...prev, email: text }));
   const inputHandlerPass = (text: string) => setState((prev) => ({ ...prev, password: text }));
@@ -58,7 +60,7 @@ export default function LoginScreen({ navigation }: LoginProps) {
   return (
     <TouchableWithoutFeedback onPress={keyboardHide}>
       <View style={styles.container}>
-        <Image source={require("../../assets/logo.png")} />
+        <LogoSVG width={68} height={90} />
         <Text style={styles.title}>Log in to woorkroom</Text>
         <KeyboardAvoidingView
           behavior={Platform.OS == "ios" ? "padding" : "height"}
@@ -79,17 +81,26 @@ export default function LoginScreen({ navigation }: LoginProps) {
             </View>
             <View style={styles.inputWrap}>
               <Text style={styles.label}>Password</Text>
-
               <TextInput
                 style={styles.password}
                 textAlign='center'
-                secureTextEntry={true}
+                secureTextEntry={!isShowPass}
                 value={state.password}
                 onChangeText={inputHandlerPass}
                 onFocus={() => {
                   setIsShowKeyboard(true);
                 }}
               />
+              <TouchableOpacity
+                onPress={() => setIsShowPass(!isShowPass)}
+                style={{ position: "absolute", bottom: 10, right: 0 }}
+              >
+                {isShowPass ? (
+                  <EyeCloseSVG width={24} height={24} />
+                ) : (
+                  <EyeOpenSVG width={24} height={24} />
+                )}
+              </TouchableOpacity>
             </View>
             <Text style={{ textAlign: "right", marginTop: 20 }}>Forgot password?</Text>
             <TouchableOpacity activeOpacity={0.8} onPress={onLogin} style={styles.loginSubmit}>
@@ -135,6 +146,7 @@ const styles = StyleSheet.create({
   },
 
   inputWrap: {
+    position: "relative",
     width: "100%",
     marginTop: 40,
   },
