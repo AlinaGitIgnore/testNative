@@ -1,4 +1,6 @@
-import { StatusBar } from "expo-status-bar";
+import "react-native-gesture-handler";
+
+import { NavigationContainer } from "@react-navigation/native";
 import { useState } from "react";
 import React, { useEffect } from "react";
 
@@ -6,6 +8,7 @@ import Entypo from "@expo/vector-icons/Entypo";
 import * as SplashScreen from "expo-splash-screen";
 import * as Font from "expo-font";
 import { LogBox, Text, View } from "react-native";
+import { useRoute } from "./router";
 
 LogBox.ignoreLogs(["Remote debugger"]);
 
@@ -16,10 +19,6 @@ const loadFonts = async () => {
   });
 };
 
-import {} from "react-native";
-import LoginScreen from "./screens/auth/LoginScreen";
-import RegistrScreen from "./screens/auth/RegistrScreen";
-
 const initialState = {
   email: "",
   password: "",
@@ -27,7 +26,7 @@ const initialState = {
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
-
+  const routing = useRoute(false);
   useEffect(() => {
     async function prepare() {
       try {
@@ -63,10 +62,5 @@ export default function App() {
     );
   }
 
-  return (
-    <>
-      {/* <LoginScreen /> */}
-      <RegistrScreen />
-    </>
-  );
+  return <NavigationContainer>{routing}</NavigationContainer>;
 }

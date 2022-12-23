@@ -1,6 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import React, { useEffect } from "react";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import {
   TouchableOpacity,
@@ -16,6 +17,7 @@ import {
   Alert,
   Dimensions,
 } from "react-native";
+import { RootStackParamList } from "../../types";
 
 const initialState = {
   email: "",
@@ -25,7 +27,9 @@ const initialState = {
 const window = Dimensions.get("window");
 const screen = Dimensions.get("screen");
 
-export default function LoginScreen() {
+type LoginProps = NativeStackScreenProps<RootStackParamList, "LoginScreen">;
+
+export default function LoginScreen({ navigation }: LoginProps) {
   const [dimensions, setDimensions] = useState({ window, screen });
 
   useEffect(() => {
@@ -55,6 +59,7 @@ export default function LoginScreen() {
     <TouchableWithoutFeedback onPress={keyboardHide}>
       <View style={styles.container}>
         <Image source={require("../../assets/logo.png")} />
+        <Text style={styles.title}>Log in to woorkroom</Text>
         <KeyboardAvoidingView
           behavior={Platform.OS == "ios" ? "padding" : "height"}
           style={{ width: "100%" }}
@@ -87,9 +92,15 @@ export default function LoginScreen() {
               />
             </View>
             <Text style={{ textAlign: "right", marginTop: 20 }}>Forgot password?</Text>
-            <TouchableOpacity activeOpacity={0.8} onPress={() => {}} style={styles.loginSubmit}>
-              <Text style={styles.submitTitle} onPress={onLogin}>
-                Log in
+            <TouchableOpacity activeOpacity={0.8} onPress={onLogin} style={styles.loginSubmit}>
+              <Text style={styles.submitTitle}>Log in</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.newUserWrap}
+              onPress={() => navigation.navigate("RegisterScreen")}
+            >
+              <Text style={styles.link}>
+                New User? <Text style={styles.createUserLink}>Create Account</Text>
               </Text>
             </TouchableOpacity>
           </View>
@@ -108,6 +119,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 32,
     fontFamily: "Poppins-Regular",
+  },
+
+  title: {
+    fontStyle: "normal",
+    fontWeight: "500",
+    fontSize: 24,
+    lineHeight: 36,
+    textTransform: "capitalize",
+    color: "#1F1D1D",
   },
   form: {
     width: "100%",
@@ -168,5 +188,19 @@ const styles = StyleSheet.create({
     textTransform: "capitalize",
     color: "#1F1D1D",
     textAlign: "center",
+  },
+  link: {
+    fontWeight: "400",
+    fontSize: 14,
+    lineHeight: 21,
+  },
+  newUserWrap: {
+    alignSelf: "center",
+    marginTop: 35,
+  },
+
+  createUserLink: {
+    marginLeft: 10,
+    color: "#FFC612",
   },
 });

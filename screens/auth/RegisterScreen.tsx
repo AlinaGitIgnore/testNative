@@ -1,7 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import React, { useEffect } from "react";
-
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   TouchableOpacity,
   Image,
@@ -18,6 +18,8 @@ import {
   FlatList,
   GestureResponderEvent,
 } from "react-native";
+import { RootStackParamList } from "../../types";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const initialState = {
   name: "",
@@ -33,8 +35,8 @@ const data = [
   { label: "+2", value: "+2" },
   { label: "+3", value: "+3" },
 ];
-
-export default function RegistrScreen() {
+type RegisterProps = NativeStackScreenProps<RootStackParamList, "RegisterScreen">;
+export default function RegisterScreen({ navigation }: RegisterProps) {
   const [items, setItems] = useState(data);
 
   const [dimensions, setDimensions] = useState({ window, screen });
@@ -60,7 +62,7 @@ export default function RegistrScreen() {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
   };
-  const onRegistr = () => {
+  const onRegister = () => {
     keyboardHide();
     Alert.alert("Credentials", `${state}`);
     setState(initialState);
@@ -74,15 +76,20 @@ export default function RegistrScreen() {
   return (
     <TouchableWithoutFeedback onPress={keyboardHide}>
       <View style={styles.container}>
-        {/* <Image source={require("../../assets/logo.png")} /> */}
-
+        <Image
+          source={require("../../assets/logo.png")}
+          fadeDuration={0}
+          style={{ width: 68, height: 90 }}
+        />
+        <Text style={styles.title}>Sign Up To woorkroom</Text>
         <KeyboardAvoidingView
           behavior={Platform.OS == "ios" ? "padding" : "height"}
-          style={{ width: "100%" }}
+          style={{ width: "100%", marginTop: 50 }}
         >
           <View style={styles.form}>
             <Text style={styles.selectValue} onPress={() => setIsOpen(!isOpen)}>
               {code}
+              <MaterialIcons name='keyboard-arrow-down' size={20} color='#9795A4' />
             </Text>
             <View style={{ ...styles.selectList, display: isOpen ? "flex" : "none" }}>
               <FlatList
@@ -149,14 +156,20 @@ export default function RegistrScreen() {
             </View> */}
 
             <TouchableOpacity activeOpacity={0.8} onPress={() => {}} style={styles.loginSubmit}>
-              <Text style={styles.submitTitle} onPress={onRegistr}>
+              <Text style={styles.submitTitle} onPress={onRegister}>
                 Next
               </Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
-        <Text style={{ textAlign: "right", marginTop: 20 }}>Have Account?Log In</Text>
-        <StatusBar style='auto' />
+        <TouchableOpacity
+          onPress={() => navigation.navigate("LoginScreen")}
+          style={styles.existUserWrap}
+        >
+          <Text style={styles.link}>
+            Have Account? <Text style={styles.loginLink}>Log In</Text>
+          </Text>
+        </TouchableOpacity>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -171,6 +184,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     fontFamily: "Poppins-Regular",
   },
+
+  title: {
+    fontStyle: "normal",
+    fontWeight: "500",
+    fontSize: 24,
+    lineHeight: 36,
+    textTransform: "capitalize",
+    color: "#1F1D1D",
+  },
   form: {
     position: "relative",
     width: "100%",
@@ -182,14 +204,15 @@ const styles = StyleSheet.create({
     borderColor: "#D7D7D7",
     borderWidth: 1,
     borderRadius: 15,
-    padding: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
     fontWeight: "500",
     fontSize: 16,
     lineHeight: 24,
     color: "#9795A4",
   },
   selectList: {
-    top: 48,
+    top: 50,
     left: 0,
     position: "absolute",
     borderColor: "#D7D7D7",
@@ -275,5 +298,20 @@ const styles = StyleSheet.create({
     textTransform: "capitalize",
     color: "#1F1D1D",
     textAlign: "center",
+  },
+
+  existUserWrap: {
+    alignSelf: "center",
+    marginTop: 35,
+  },
+
+  link: {
+    fontWeight: "400",
+    fontSize: 14,
+    lineHeight: 21,
+  },
+  loginLink: {
+    marginLeft: 10,
+    color: "#FFC612",
   },
 });
