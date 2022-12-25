@@ -22,6 +22,7 @@ import {
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { RootStackParamList } from "../../types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import EditSVG from "../../assets/Edit.svg";
 
 const initialState = {
   phone: "+440-9655-6954",
@@ -69,7 +70,10 @@ const ProfileScreen = ({ navigation }: ProfileProps) => {
                 </TouchableOpacity>
               </View>
               <View style={styles.mainInfo}>
-                <Image source={require("../../assets/Photo.png")} />
+                <TouchableOpacity onPress={() => {}}>
+                  <Image source={require("../../assets/Photo.png")} />
+                  <EditSVG style={{ position: "absolute", top: 50, right: 0 }} />
+                </TouchableOpacity>
                 <Text style={styles.name}>{state.name}</Text>
                 <Text style={styles.position}>{state.position}</Text>
               </View>
