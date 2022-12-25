@@ -70,7 +70,7 @@ export default function LoginScreen({ navigation }: LoginProps) {
             <View style={styles.inputWrap}>
               <Text style={styles.label}>Your email</Text>
               <TextInput
-                style={styles.email}
+                style={styles.input}
                 textAlign='center'
                 value={state.email}
                 onChangeText={inputHandlerEmail}
@@ -82,7 +82,7 @@ export default function LoginScreen({ navigation }: LoginProps) {
             <View style={styles.inputWrap}>
               <Text style={styles.label}>Password</Text>
               <TextInput
-                style={styles.password}
+                style={styles.input}
                 textAlign='center'
                 secureTextEntry={!isShowPass}
                 value={state.password}
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   },
   form: {
     width: "100%",
-    marginBottom: 100,
+    marginBottom: 20,
   },
 
   inputWrap: {
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     color: "#9795A4",
   },
 
-  email: {
+  input: {
     width: "100%",
     borderBottomWidth: 1,
     borderBottomColor: "#D7D7D7",
@@ -171,18 +171,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 1.5,
     textShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
-  },
-
-  password: {
-    width: "100%",
-    borderBottomWidth: 1,
-    borderBottomColor: "#D7D7D7",
-    paddingVertical: 12,
-    color: "#1F1D1D",
-    fontStyle: "normal",
-    fontWeight: "500",
-    fontSize: 32,
-    lineHeight: 1.5,
   },
 
   loginSubmit: {

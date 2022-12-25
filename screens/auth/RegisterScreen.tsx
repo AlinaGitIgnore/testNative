@@ -1,5 +1,4 @@
-import { useState } from "react";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
@@ -29,6 +28,7 @@ import LogoSVG from "../../assets/logo.svg";
 import ArrowDownSVG from "../../assets/arrowDown.svg";
 import EyeOpenSVG from "../../assets/eyeOpen.svg";
 import EyeCloseSVG from "../../assets/eyeClose.svg";
+import CodeInputs from "../../components/CodeInput";
 
 const initialState = {
   phone: "",
@@ -140,10 +140,13 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
                     </View>
                   </View>
                 </View>
+                <View>
+                  <CodeInputs />
+                </View>
                 <View style={styles.inputWrap}>
                   <Text style={styles.label}>Your Name</Text>
                   <TextInput
-                    style={styles.name}
+                    style={styles.input}
                     textAlign='left'
                     value={state.name}
                     onChangeText={inputHandlerName}
@@ -155,7 +158,7 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
                 <View style={styles.inputWrap}>
                   <Text style={styles.label}>Your email</Text>
                   <TextInput
-                    style={styles.email}
+                    style={styles.input}
                     textAlign='left'
                     value={state.email}
                     onChangeText={inputHandlerEmail}
@@ -168,7 +171,7 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
                   <Text style={styles.label}>Password</Text>
 
                   <TextInput
-                    style={styles.password}
+                    style={styles.input}
                     textAlign='center'
                     secureTextEntry={!isShowPass}
                     value={state.password}
@@ -192,7 +195,7 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
                   <Text style={styles.label}>Confirm Password</Text>
 
                   <TextInput
-                    style={styles.password}
+                    style={styles.input}
                     textAlign='center'
                     secureTextEntry={!isShowConfPass}
                     value={state.confPassword}
@@ -341,8 +344,7 @@ const styles = StyleSheet.create({
     textTransform: "capitalize",
     color: "#9795A4",
   },
-
-  name: {
+  input: {
     width: "100%",
     borderBottomWidth: 1,
     borderBottomColor: "#D7D7D7",
@@ -351,33 +353,8 @@ const styles = StyleSheet.create({
     fontStyle: "normal",
     fontWeight: "500",
     fontSize: 16,
-    lineHeight: 1.5,
+    lineHeight: 21,
     textShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
-  },
-
-  email: {
-    width: "100%",
-    borderBottomWidth: 1,
-    borderBottomColor: "#D7D7D7",
-    paddingVertical: 12,
-    color: "#1F1D1D",
-    fontStyle: "normal",
-    fontWeight: "500",
-    fontSize: 16,
-    lineHeight: 1.5,
-    textShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
-  },
-
-  password: {
-    width: "100%",
-    borderBottomWidth: 1,
-    borderBottomColor: "#D7D7D7",
-    paddingVertical: 12,
-    color: "#1F1D1D",
-    fontStyle: "normal",
-    fontWeight: "500",
-    fontSize: 32,
-    lineHeight: 1.5,
   },
 
   loginSubmit: {

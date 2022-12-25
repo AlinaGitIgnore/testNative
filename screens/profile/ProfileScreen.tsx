@@ -1,8 +1,265 @@
-import React from "react";
-import { Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  Platform,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Alert,
+  Dimensions,
+  FlatList,
+  GestureResponderEvent,
+  TouchableOpacityComponent,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+} from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { RootStackParamList } from "../../types";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
-const ProfileScreen = () => {
-  return <Text>Profile</Text>;
+const initialState = {
+  phone: "+440-9655-6954",
+  name: "Mike Tyson",
+  email: "miketyson@gmail.com",
+  position: "UI/UX Designer",
+  skype: "live-miketyson98",
+  photo: "../../assets/Photo.png",
+};
+
+type ProfileProps = NativeStackScreenProps<RootStackParamList, "ProfileScreen">;
+const ProfileScreen = ({ navigation }: ProfileProps) => {
+  const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+  const [state, setState] = useState(initialState);
+
+  const inputHandlerPhone = (text: string) => setState((prev) => ({ ...prev, phone: text }));
+  const inputHandlerName = (text: string) => setState((prev) => ({ ...prev, name: text }));
+  const inputHandlerEmail = (text: string) => setState((prev) => ({ ...prev, email: text }));
+  const inputHandlerPosition = (text: string) => setState((prev) => ({ ...prev, position: text }));
+  const inputHandlerSkype = (text: string) => setState((prev) => ({ ...prev, skype: text }));
+
+  const keyboardHide = () => {
+    setIsShowKeyboard(false);
+    Keyboard.dismiss();
+  };
+
+  const onLogOut = () => {
+    keyboardHide();
+    // Alert.alert("Credentials", `${state}`);
+    // setState(initialState);
+    navigation.navigate("LoginScreen");
+  };
+
+  const onSave = () => {};
+  return (
+    <SafeAreaView>
+      <ScrollView style={styles.scrollView}>
+        <TouchableWithoutFeedback onPress={keyboardHide}>
+          <KeyboardAwareScrollView style={{ width: "100%" }}>
+            <View style={styles.container}>
+              <View style={styles.header}>
+                <Text style={styles.title}>Edit profile</Text>
+                <TouchableOpacity onPress={onLogOut} style={styles.linkLogOut}>
+                  <Text style={styles.linkText}>Log Out</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.mainInfo}>
+                <Image source={require("../../assets/Photo.png")} />
+                <Text style={styles.name}>{state.name}</Text>
+                <Text style={styles.position}>{state.position}</Text>
+              </View>
+              <View style={{}}>
+                <View style={{ ...styles.inputWrap, marginTop: 0 }}>
+                  <Text style={styles.label}>Name</Text>
+                  <TextInput
+                    style={styles.input}
+                    textAlign='left'
+                    value={state.name}
+                    onChangeText={inputHandlerName}
+                    onFocus={() => {
+                      setIsShowKeyboard(true);
+                    }}
+                  />
+                </View>
+                <View style={styles.inputWrap}>
+                  <Text style={styles.label}>Email</Text>
+                  <TextInput
+                    style={styles.input}
+                    textAlign='left'
+                    value={state.email}
+                    onChangeText={inputHandlerEmail}
+                    onFocus={() => {
+                      setIsShowKeyboard(true);
+                    }}
+                  />
+                </View>
+                <View style={styles.inputWrap}>
+                  <Text style={styles.label}>Phone</Text>
+                  <TextInput
+                    style={styles.input}
+                    textAlign='left'
+                    keyboardType='numeric'
+                    value={state.phone}
+                    onChangeText={inputHandlerPhone}
+                    onFocus={() => {
+                      setIsShowKeyboard(true);
+                    }}
+                  />
+                </View>
+                <View style={styles.inputWrap}>
+                  <Text style={styles.label}>Position</Text>
+                  <TextInput
+                    style={styles.input}
+                    textAlign='left'
+                    value={state.position}
+                    onChangeText={inputHandlerPosition}
+                    onFocus={() => {
+                      setIsShowKeyboard(true);
+                    }}
+                  />
+                </View>
+                <View style={styles.inputWrap}>
+                  <Text style={styles.label}>Skype</Text>
+                  <TextInput
+                    style={styles.input}
+                    textAlign='left'
+                    value={state.skype}
+                    onChangeText={inputHandlerSkype}
+                    onFocus={() => {
+                      setIsShowKeyboard(true);
+                    }}
+                  />
+                </View>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => {}}
+                  style={styles.profileSubmit}
+                >
+                  <Text style={styles.submitTitle} onPress={onSave}>
+                    Save
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </KeyboardAwareScrollView>
+        </TouchableWithoutFeedback>
+      </ScrollView>
+    </SafeAreaView>
+  );
 };
 
 export default ProfileScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    fontFamily: "Poppins-Regular",
+    paddingTop: StatusBar.currentHeight,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    paddingHorizontal: 32,
+    minHeight: "100%",
+  },
+  scrollView: { width: "100%" },
+
+  header: {
+    position: "relative",
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 50,
+  },
+
+  title: {
+    fontStyle: "normal",
+    fontWeight: "500",
+    fontSize: 18,
+    lineHeight: 27,
+    textTransform: "capitalize",
+    color: "#1F1D1D",
+  },
+
+  linkLogOut: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+  },
+
+  linkText: { fontWeight: "500", fontSize: 16, lineHeight: 24, color: "#FFC612" },
+
+  mainInfo: {
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 30,
+  },
+
+  name: {
+    fontWeight: "500",
+    fontSize: 24,
+    lineHeight: 36,
+    textTransform: "capitalize",
+    color: "#1F1D1D",
+    marginTop: 10,
+  },
+
+  position: {
+    fontWeight: "500",
+    fontSize: 14,
+    lineHeight: 21,
+    textTransform: "capitalize",
+    color: "#9795A4",
+    marginTop: 3,
+  },
+
+  inputWrap: {
+    position: "relative",
+    width: "100%",
+    marginTop: 40,
+  },
+
+  label: {
+    fontWeight: "500",
+    fontSize: 14,
+    lineHeight: 21,
+    textTransform: "capitalize",
+    color: "#9795A4",
+  },
+  input: {
+    width: "100%",
+    borderBottomWidth: 1,
+    borderBottomColor: "#D7D7D7",
+    paddingVertical: 12,
+    color: "#1F1D1D",
+    fontStyle: "normal",
+    fontWeight: "500",
+    fontSize: 16,
+    lineHeight: 21,
+    textShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
+  },
+
+  profileSubmit: {
+    width: "100%",
+    backgroundColor: "#FFC612",
+    borderRadius: 20,
+    paddingVertical: 17,
+    marginTop: 30,
+    marginBottom: 37,
+  },
+
+  submitTitle: {
+    fontStyle: "normal",
+    fontWeight: "500",
+    fontSize: 18,
+    lineHeight: 27,
+    textTransform: "capitalize",
+    color: "#1F1D1D",
+    textAlign: "center",
+  },
+});

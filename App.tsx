@@ -26,7 +26,7 @@ const initialState = {
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
-  const routing = useRoute(false);
+  const routing = useRoute(true);
   useEffect(() => {
     async function prepare() {
       try {
