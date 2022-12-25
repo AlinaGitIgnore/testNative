@@ -26,7 +26,7 @@ const initialState = {
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
-  const routing = useRoute(true);
+  const routing = useRoute(false);
   useEffect(() => {
     async function prepare() {
       try {
@@ -53,7 +53,11 @@ export default function App() {
   if (!appIsReady) {
     return (
       <View
-        style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
         onLayout={onLayoutRootView}
       >
         <Text>SplashScreen Demo! 👋</Text>

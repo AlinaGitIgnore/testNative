@@ -28,7 +28,8 @@ import LogoSVG from "../../assets/logo.svg";
 import ArrowDownSVG from "../../assets/arrowDown.svg";
 import EyeOpenSVG from "../../assets/eyeOpen.svg";
 import EyeCloseSVG from "../../assets/eyeClose.svg";
-import CodeInputs from "../../components/CodeInput";
+import CodeInputs from "../../components/CodeInput/CodeInput";
+import PhoneInputComponent from "../../components/PhoneInput/PhoneInput";
 
 const initialState = {
   phone: "",
@@ -99,10 +100,10 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
               <View style={styles.form}>
                 <View style={styles.inputWrap}>
                   <Text style={styles.label}>Your Phone</Text>
-                  <View style={styles.phoneInputWrap}>
+                  {/* <View style={styles.phoneInputWrap}>
                     <TouchableOpacity onPress={() => setIsOpen(!isOpen)}>
                       <View style={styles.phoneCodeWrap}>
-                        <Text style={styles.selectValue}>{code}</Text>
+                        <Text style={styles.phoneInput}>{code}</Text>
                         {
                           <ArrowDownSVG
                             width={10}
@@ -118,7 +119,6 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
                       </View>
                     </TouchableOpacity>
                     <View style={{ ...styles.selectList, display: isOpen ? "flex" : "none" }}>
-                      <View />
                       {data.map((item, idx) => (
                         <Text onPress={(e) => selectValue(e)} style={styles.item} key={idx}>
                           {item.value}
@@ -128,8 +128,8 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
                     <View style={styles.inputNumber}>
                       <TextInput
                         placeholder='345 567-23-56'
-                        keyboardType='numeric'
-                        style={styles.selectValue}
+                        // keyboardType='numeric'
+                        style={styles.phoneInput}
                         textAlign='left'
                         value={state.phone}
                         onChangeText={inputHandlerPhone}
@@ -138,7 +138,8 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
                         }}
                       />
                     </View>
-                  </View>
+                  </View> */}
+                  <PhoneInputComponent />
                 </View>
                 <View>
                   <CodeInputs />
@@ -172,7 +173,7 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
 
                   <TextInput
                     style={styles.input}
-                    textAlign='center'
+                    textAlign='left'
                     secureTextEntry={!isShowPass}
                     value={state.password}
                     onChangeText={inputHandlerPass}
@@ -196,7 +197,7 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
 
                   <TextInput
                     style={styles.input}
-                    textAlign='center'
+                    textAlign='left'
                     secureTextEntry={!isShowConfPass}
                     value={state.confPassword}
                     onChangeText={inputHandlerConfPass}
@@ -205,7 +206,7 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
                     }}
                   />
                   <TouchableOpacity
-                    onPress={() => setIsShowConfPass(!isShowPass)}
+                    onPress={() => setIsShowConfPass(!isShowConfPass)}
                     style={{ position: "absolute", bottom: 10, right: 0 }}
                   >
                     {isShowConfPass ? (
@@ -274,8 +275,6 @@ const styles = StyleSheet.create({
     borderColor: "#D7D7D7",
     borderWidth: 1,
     borderRadius: 15,
-    paddingHorizontal: 15,
-    paddingVertical: 12,
   },
 
   openSelect: {
@@ -283,11 +282,17 @@ const styles = StyleSheet.create({
     top: 22,
     right: 10,
   },
-  selectValue: {
+
+  phoneInput: {
+    alignItems: "center",
     fontWeight: "500",
     fontSize: 16,
     lineHeight: 24,
     color: "#9795A4",
+    fontStyle: "normal",
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    overflow: "hidden",
   },
   selectList: {
     top: 55,
@@ -296,10 +301,10 @@ const styles = StyleSheet.create({
     borderColor: "#D7D7D7",
     borderWidth: 1,
     borderRadius: 15,
-    backgroundColor: "white",
+    backgroundColor: "#fffff",
     width: 70,
     height: 96,
-    zIndex: 3,
+    zIndex: 100,
   },
   item: {
     fontWeight: "500",
@@ -323,13 +328,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#D7D7D7",
     borderRadius: 15,
-    paddingHorizontal: 15,
-    paddingVertical: 12,
     marginLeft: 25,
-    fontWeight: "500",
-    fontSize: 16,
-    lineHeight: 24,
-    color: "#9795A4",
   },
   inputWrap: {
     position: "relative",
@@ -345,16 +344,19 @@ const styles = StyleSheet.create({
     color: "#9795A4",
   },
   input: {
+    alignItems: "center",
     width: "100%",
     borderBottomWidth: 1,
     borderBottomColor: "#D7D7D7",
-    paddingVertical: 12,
     color: "#1F1D1D",
     fontStyle: "normal",
     fontWeight: "500",
     fontSize: 16,
     lineHeight: 21,
     textShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
+    paddingTop: 15,
+    paddingBottom: 12,
+    overflow: "hidden",
   },
 
   loginSubmit: {

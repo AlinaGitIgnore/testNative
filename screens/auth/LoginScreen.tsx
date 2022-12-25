@@ -71,7 +71,7 @@ export default function LoginScreen({ navigation }: LoginProps) {
               <Text style={styles.label}>Your email</Text>
               <TextInput
                 style={styles.input}
-                textAlign='center'
+                textAlign='left'
                 value={state.email}
                 onChangeText={inputHandlerEmail}
                 onFocus={() => {
@@ -83,7 +83,7 @@ export default function LoginScreen({ navigation }: LoginProps) {
               <Text style={styles.label}>Password</Text>
               <TextInput
                 style={styles.input}
-                textAlign='center'
+                textAlign='left'
                 secureTextEntry={!isShowPass}
                 value={state.password}
                 onChangeText={inputHandlerPass}
@@ -102,7 +102,9 @@ export default function LoginScreen({ navigation }: LoginProps) {
                 )}
               </TouchableOpacity>
             </View>
-            <Text style={{ textAlign: "right", marginTop: 20 }}>Forgot password?</Text>
+            <TouchableOpacity>
+              <Text style={styles.forgotPass}>Forgot password?</Text>
+            </TouchableOpacity>
             <TouchableOpacity activeOpacity={0.8} onPress={onLogin} style={styles.loginSubmit}>
               <Text style={styles.submitTitle}>Log in</Text>
             </TouchableOpacity>
@@ -151,26 +153,27 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: 40,
   },
-
+  input: {
+    alignItems: "center",
+    width: "100%",
+    borderBottomWidth: 1,
+    borderBottomColor: "#D7D7D7",
+    color: "#1F1D1D",
+    fontStyle: "normal",
+    fontWeight: "500",
+    fontSize: 16,
+    lineHeight: 21,
+    textShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
+    paddingTop: 15,
+    paddingBottom: 12,
+    overflow: "hidden",
+  },
   label: {
     fontWeight: "500",
     fontSize: 14,
     lineHeight: 21,
     textTransform: "capitalize",
     color: "#9795A4",
-  },
-
-  input: {
-    width: "100%",
-    borderBottomWidth: 1,
-    borderBottomColor: "#D7D7D7",
-    paddingVertical: 12,
-    color: "#1F1D1D",
-    fontStyle: "normal",
-    fontWeight: "500",
-    fontSize: 16,
-    lineHeight: 1.5,
-    textShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
   },
 
   loginSubmit: {
@@ -203,5 +206,14 @@ const styles = StyleSheet.create({
   createUserLink: {
     marginLeft: 10,
     color: "#FFC612",
+  },
+
+  forgotPass: {
+    fontWeight: "400",
+    fontSize: 14,
+    lineHeight: 21,
+    textAlign: "right",
+    marginTop: 20,
+    color: "#9795A4",
   },
 });
