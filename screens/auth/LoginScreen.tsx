@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import EyeOpenSVG from "../../assets/eyeOpen.svg";
 import EyeCloseSVG from "../../assets/eyeClose.svg";
 import LogoSVG from "../../assets/logo.svg";
+import * as SQLite from "expo-sqlite";
 import {
   TouchableOpacity,
   StyleSheet,
@@ -18,20 +19,40 @@ import {
   Dimensions,
   StatusBar,
 } from "react-native";
+import { Formik } from "formik";
+import { validationSchemaLogin } from "../../utils/validationShema";
 import { RootStackParamList } from "../../types";
-
-const initialState = {
-  email: "",
-  password: "",
-};
+const db = SQLite.openDatabase("MainDB.db");
 
 const window = Dimensions.get("window");
 const screen = Dimensions.get("screen");
 
 type LoginProps = NativeStackScreenProps<RootStackParamList, "LoginScreen">;
+const initialState = {
+  email: "",
+  password: "",
+};
 
 export default function LoginScreen({ navigation }: LoginProps) {
   const [dimensions, setDimensions] = useState({ window, screen });
+
+  const getUser = async () => {
+    try {
+      await db.transaction(async (tx) => {
+        await tx.executeSql("SELECT Email, Password FROM Users", [], (tx, results) => {
+          const len = results.rows.length;
+          if (len > 0) {
+            const email = results.rows.item(0).Email;
+            const password = results.rows.item(0).Password;
+            setState({ email, password });
+          }
+        });
+      });
+      navigation.navigate("ProfileScreen");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener("change", ({ window, screen }) => {
@@ -44,9 +65,6 @@ export default function LoginScreen({ navigation }: LoginProps) {
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
   const [isShowPass, setIsShowPass] = useState(false);
 
-  const inputHandlerEmail = (text: string) => setState((prev) => ({ ...prev, email: text }));
-  const inputHandlerPass = (text: string) => setState((prev) => ({ ...prev, password: text }));
-
   const keyboardHide = () => {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
@@ -54,69 +72,96 @@ export default function LoginScreen({ navigation }: LoginProps) {
   const onLogin = () => {
     keyboardHide();
     Alert.alert("Credentials", `${state.email} + ${state.password}`);
-    setState(initialState);
   };
 
   return (
     <TouchableWithoutFeedback onPress={keyboardHide}>
       <View style={styles.container}>
         <LogoSVG width={68} height={90} style={{ marginTop: 50 }} />
-        <Text style={styles.title}>Log in to woorkroom</Text>
+        <Text style={styles.title}>Log in to workroom</Text>
         <KeyboardAvoidingView
           behavior={Platform.OS == "ios" ? "padding" : "height"}
           style={{ width: "100%" }}
         >
-          <View style={styles.form}>
-            <View style={styles.inputWrap}>
-              <Text style={styles.label}>Your email</Text>
-              <TextInput
-                style={styles.input}
-                textAlign='left'
-                value={state.email}
-                onChangeText={inputHandlerEmail}
-                onFocus={() => {
-                  setIsShowKeyboard(true);
-                }}
-              />
-            </View>
-            <View style={styles.inputWrap}>
-              <Text style={styles.label}>Password</Text>
-              <TextInput
-                style={styles.input}
-                textAlign='left'
-                secureTextEntry={!isShowPass}
-                value={state.password}
-                onChangeText={inputHandlerPass}
-                onFocus={() => {
-                  setIsShowKeyboard(true);
-                }}
-              />
-              <TouchableOpacity
-                onPress={() => setIsShowPass(!isShowPass)}
-                style={{ position: "absolute", bottom: 10, right: 0 }}
-              >
-                {isShowPass ? (
-                  <EyeCloseSVG width={24} height={24} />
-                ) : (
-                  <EyeOpenSVG width={24} height={24} />
-                )}
-              </TouchableOpacity>
-            </View>
-            <TouchableOpacity>
-              <Text style={styles.forgotPass}>Forgot password?</Text>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.8} onPress={onLogin} style={styles.loginSubmit}>
-              <Text style={styles.submitTitle}>Log in</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.newUserWrap}
-              onPress={() => navigation.navigate("RegisterScreen")}
-            >
-              <Text style={styles.link}>
-                New User? <Text style={styles.createUserLink}>Create Account</Text>
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <Formik
+            initialValues={initialState}
+            validationSchema={validationSchemaLogin}
+            onSubmit={(values, actions) => {
+              console.log(values);
+              actions.resetForm();
+            }}
+          >
+            {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+              <View style={styles.form}>
+                <View style={styles.inputWrap}>
+                  <Text style={styles.label}>Your email</Text>
+                  {errors.email && touched.email ? (
+                    <Text style={styles.errorMessage}>{errors.email}</Text>
+                  ) : (
+                    <></>
+                  )}
+                  <TextInput
+                    onChangeText={handleChange("email")}
+                    onBlur={handleBlur("email")}
+                    value={values.email}
+                    style={styles.input}
+                    textAlign='left'
+                    onFocus={() => {
+                      setIsShowKeyboard(true);
+                    }}
+                  />
+                </View>
+                <View style={styles.inputWrap}>
+                  <Text style={styles.label}>Password</Text>
+                  {errors.password || touched.password ? (
+                    <Text style={styles.errorMessage}>{errors.password}</Text>
+                  ) : (
+                    <></>
+                  )}
+                  <TextInput
+                    style={styles.input}
+                    textAlign='left'
+                    secureTextEntry={!isShowPass}
+                    value={values.password}
+                    onChangeText={handleChange("password")}
+                    onBlur={handleBlur("password")}
+                    onFocus={() => {
+                      setIsShowKeyboard(true);
+                    }}
+                  />
+                  <TouchableOpacity
+                    onPress={() => setIsShowPass(!isShowPass)}
+                    style={{ position: "absolute", bottom: 10, right: 0 }}
+                  >
+                    {isShowPass ? (
+                      <EyeCloseSVG width={24} height={24} />
+                    ) : (
+                      <EyeOpenSVG width={24} height={24} />
+                    )}
+                  </TouchableOpacity>
+                </View>
+                <TouchableOpacity>
+                  <Text style={styles.forgotPass}>Forgot password?</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => handleSubmit()}
+                  style={styles.loginSubmit}
+                >
+                  <Text style={styles.submitTitle}>Log in</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </Formik>
+          <TouchableOpacity
+            style={styles.newUserWrap}
+            onPress={() => navigation.navigate("RegisterScreen")}
+          >
+            <Text style={styles.link}>
+              New User? <Text style={styles.createUserLink}>Create Account</Text>
+            </Text>
+          </TouchableOpacity>
         </KeyboardAvoidingView>
       </View>
     </TouchableWithoutFeedback>
@@ -215,5 +260,14 @@ const styles = StyleSheet.create({
     textAlign: "right",
     marginTop: 20,
     color: "#9795A4",
+  },
+
+  errorMessage: {
+    position: "absolute",
+    top: 20,
+    left: 0,
+    fontWeight: "400",
+    fontSize: 16,
+    color: "#d52121",
   },
 });

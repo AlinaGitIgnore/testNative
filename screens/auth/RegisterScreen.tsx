@@ -30,9 +30,14 @@ import EyeOpenSVG from "../../assets/eyeOpen.svg";
 import EyeCloseSVG from "../../assets/eyeClose.svg";
 import CodeInputs from "../../components/CodeInput/CodeInput";
 import PhoneInputComponent from "../../components/PhoneInput/PhoneInput";
+import * as SQLite from "expo-sqlite";
+import { Formik } from "formik";
+import { validationSchemaRegister } from "../../utils/validationShema";
+import * as Sharing from "expo-sharing";
+import * as FileSystem from "expo-file-system";
+import * as DocumentPicker from "expo-document-picker";
 
 const initialState = {
-  phone: "",
   name: "",
   email: "",
   password: "",
@@ -41,15 +46,54 @@ const initialState = {
 
 const window = Dimensions.get("window");
 const screen = Dimensions.get("screen");
-const data = [
-  { label: "+1", value: "+1" },
-  { label: "+2", value: "+2" },
-  { label: "+3", value: "+3" },
-];
+// const data = [
+//   { label: "+1", value: "+1" },
+//   { label: "+2", value: "+2" },
+//   { label: "+3", value: "+3" },
+// ];
+
 type RegisterProps = NativeStackScreenProps<RootStackParamList, "RegisterScreen">;
 export default function RegisterScreen({ navigation }: RegisterProps) {
+  const [db, setDb] = useState(SQLite.openDatabase("MainDb.db"));
+  // const [items, setItems] = useState(data);
+  // const [isOpen, setIsOpen] = useState(false);
+  // const [code, setCode] = useState("+1");
   const [dimensions, setDimensions] = useState({ window, screen });
+  const [number, setNumber] = useState("");
+  const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+  const [isShowPass, setIsShowPass] = useState(false);
+  const [isShowConfPass, setIsShowConfPass] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
+  const exportDb = async () => {
+    await Sharing.shareAsync(FileSystem.documentDirectory + "SQLite/MainDb.db");
+  };
+
+  const importDb = async () => {
+    let result = await DocumentPicker.getDocumentAsync({
+      copyToCacheDirectory: true,
+    });
+
+    if (result.type === "success") {
+      setIsLoading(true);
+
+      if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + "SQLite")).exists) {
+        await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + "SQLite");
+      }
+
+      const base64 = await FileSystem.readAsStringAsync(result.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      await FileSystem.writeAsStringAsync(
+        FileSystem.documentDirectory + "SQLite/example.db",
+        base64,
+        { encoding: FileSystem.EncodingType.Base64 }
+      );
+      await db.closeAsync();
+      setDb(SQLite.openDatabase("example.db"));
+    }
+  };
   useEffect(() => {
     const subscription = Dimensions.addEventListener("change", ({ window, screen }) => {
       setDimensions({ window, screen });
@@ -57,45 +101,75 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
     return () => subscription?.remove();
   });
 
-  const [items, setItems] = useState(data);
-  const [isOpen, setIsOpen] = useState(false);
-  const [state, setState] = useState(initialState);
-  const [isShowKeyboard, setIsShowKeyboard] = useState(false);
-  const [code, setCode] = useState("+1");
-  const [isShowPass, setIsShowPass] = useState(false);
-  const [isShowConfPass, setIsShowConfPass] = useState(false);
+  useEffect(() => {
+    createTable();
+  }, []);
 
-  const inputHandlerPhone = (text: string) => setState((prev) => ({ ...prev, phone: text }));
-  const inputHandlerName = (text: string) => setState((prev) => ({ ...prev, name: text }));
-  const inputHandlerEmail = (text: string) => setState((prev) => ({ ...prev, email: text }));
-  const inputHandlerPass = (text: string) => setState((prev) => ({ ...prev, password: text }));
-  const inputHandlerConfPass = (text: string) =>
-    setState((prev) => ({ ...prev, confPassword: text }));
+  const createTable = () => {
+    db.transaction((tx: { executeSql: (arg0: string) => any }) =>
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXIST " +
+          "Users " +
+          "(ID INTEGER PRIMARY KEY AUTOINCREMENT, Email TEXT, Phone TEXT, Name TEXT, Password TEXT, Position TEXT, Skype TEXT);"
+      )
+    );
+    db.transaction((tx) => {
+      tx.executeSql("SELECT");
+    });
+  };
+
+  interface IValues {
+    name: string;
+    email: string;
+    password: string;
+    confPassword: string;
+  }
+  const addUser = async (values: IValues) => {
+    try {
+      await db.transaction((tx) => {
+        tx.executeSql("INSERT INTO Users (Email, Phone, Name, Password) VALUES (?, ?)", [
+          values.email,
+          number,
+          values.name,
+          values.password,
+        ]);
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const keyboardHide = () => {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
   };
-  const onRegister = () => {
-    keyboardHide();
-    Alert.alert("Credentials", `${state}`);
-    setState(initialState);
-    navigation.navigate("ProfileScreen");
-  };
 
-  const selectValue = (e: any) => {
-    setCode(e.target.innerText);
-    setIsOpen(!isOpen);
-  };
+  // const onRegister = () => {
+  //   keyboardHide();
+  //   setState(initialState);
+  //   setUser();
+  // };
 
+  // const selectValue = (e: any) => {
+  //   setCode(e.target.innerText);
+  //   setIsOpen(!isOpen);
+  // };
+
+  // if (isLoading) {
+  //   return (
+  //     <View>
+  //       <Text style={{ color: "black", marginTop: 100 }}>Loading...</Text>
+  //     </View>
+  //   );
+  // }
   return (
-    <SafeAreaView>
-      <ScrollView style={styles.scrollView}>
-        <TouchableWithoutFeedback onPress={keyboardHide}>
-          <KeyboardAwareScrollView style={{ width: "100%" }}>
+    <TouchableWithoutFeedback onPress={keyboardHide}>
+      <KeyboardAwareScrollView style={{ width: "100%" }}>
+        <SafeAreaView>
+          <ScrollView style={styles.scrollView}>
             <View style={styles.container}>
               <LogoSVG width={68} height={90} style={{ marginTop: 50 }} />
-              <Text style={styles.title}>Sign Up To woorkroom</Text>
+              <Text style={styles.title}>Sign Up To workroom</Text>
 
               <View style={styles.form}>
                 <View style={styles.inputWrap}>
@@ -139,92 +213,128 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
                       />
                     </View>
                   </View> */}
-                  <PhoneInputComponent />
+                  <PhoneInputComponent value={number} setValue={setNumber} />
                 </View>
                 <View>
                   <CodeInputs />
                 </View>
-                <View style={styles.inputWrap}>
-                  <Text style={styles.label}>Your Name</Text>
-                  <TextInput
-                    style={styles.input}
-                    textAlign='left'
-                    value={state.name}
-                    onChangeText={inputHandlerName}
-                    onFocus={() => {
-                      setIsShowKeyboard(true);
-                    }}
-                  />
-                </View>
-                <View style={styles.inputWrap}>
-                  <Text style={styles.label}>Your email</Text>
-                  <TextInput
-                    style={styles.input}
-                    textAlign='left'
-                    value={state.email}
-                    onChangeText={inputHandlerEmail}
-                    onFocus={() => {
-                      setIsShowKeyboard(true);
-                    }}
-                  />
-                </View>
-                <View style={styles.inputWrap}>
-                  <Text style={styles.label}>Password</Text>
 
-                  <TextInput
-                    style={styles.input}
-                    textAlign='left'
-                    secureTextEntry={!isShowPass}
-                    value={state.password}
-                    onChangeText={inputHandlerPass}
-                    onFocus={() => {
-                      setIsShowKeyboard(true);
-                    }}
-                  />
-                  <TouchableOpacity
-                    onPress={() => setIsShowPass(!isShowPass)}
-                    style={{ position: "absolute", bottom: 10, right: 0 }}
-                  >
-                    {isShowPass ? (
-                      <EyeCloseSVG width={24} height={24} />
-                    ) : (
-                      <EyeOpenSVG width={24} height={24} />
-                    )}
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.inputWrap}>
-                  <Text style={styles.label}>Confirm Password</Text>
-
-                  <TextInput
-                    style={styles.input}
-                    textAlign='left'
-                    secureTextEntry={!isShowConfPass}
-                    value={state.confPassword}
-                    onChangeText={inputHandlerConfPass}
-                    onFocus={() => {
-                      setIsShowKeyboard(true);
-                    }}
-                  />
-                  <TouchableOpacity
-                    onPress={() => setIsShowConfPass(!isShowConfPass)}
-                    style={{ position: "absolute", bottom: 10, right: 0 }}
-                  >
-                    {isShowConfPass ? (
-                      <EyeCloseSVG width={24} height={24} />
-                    ) : (
-                      <EyeOpenSVG width={24} height={24} />
-                    )}
-                  </TouchableOpacity>
-                </View>
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => {}}
-                  style={styles.loginSubmit}
+                <Formik
+                  initialValues={initialState}
+                  validationSchema={validationSchemaRegister}
+                  onSubmit={(values, actions) => {
+                    console.log(values);
+                    addUser(values);
+                    actions.resetForm();
+                  }}
                 >
-                  <Text style={styles.submitTitle} onPress={onRegister}>
-                    Next
-                  </Text>
-                </TouchableOpacity>
+                  {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                    <>
+                      <View style={styles.inputWrap}>
+                        <Text style={styles.label}>Your Name</Text>
+                        {errors.name && touched.name ? (
+                          <Text style={styles.errorMessage}>{errors.name}</Text>
+                        ) : (
+                          <></>
+                        )}
+
+                        <TextInput
+                          onChangeText={handleChange("name")}
+                          onBlur={handleBlur("name")}
+                          value={values.name}
+                          style={styles.input}
+                          textAlign='left'
+                          onFocus={() => {
+                            setIsShowKeyboard(true);
+                          }}
+                        />
+                      </View>
+                      <View style={styles.inputWrap}>
+                        <Text style={styles.label}>Your email</Text>
+                        {errors.email && touched.email ? (
+                          <Text style={styles.errorMessage}>{errors.email}</Text>
+                        ) : (
+                          <></>
+                        )}
+                        <TextInput
+                          onChangeText={handleChange("email")}
+                          onBlur={handleBlur("email")}
+                          value={values.email}
+                          style={styles.input}
+                          textAlign='left'
+                          onFocus={() => {
+                            setIsShowKeyboard(true);
+                          }}
+                        />
+                      </View>
+                      <View style={styles.inputWrap}>
+                        <Text style={styles.label}>Password</Text>
+                        {errors.password || touched.password ? (
+                          <Text style={styles.errorMessage}>{errors.password}</Text>
+                        ) : (
+                          <></>
+                        )}
+                        <TextInput
+                          style={styles.input}
+                          textAlign='left'
+                          secureTextEntry={!isShowPass}
+                          value={values.password}
+                          onChangeText={handleChange("password")}
+                          onBlur={handleBlur("password")}
+                          onFocus={() => {
+                            setIsShowKeyboard(true);
+                          }}
+                        />
+                        <TouchableOpacity
+                          onPress={() => setIsShowPass(!isShowPass)}
+                          style={{ position: "absolute", bottom: 10, right: 0 }}
+                        >
+                          {isShowPass ? (
+                            <EyeCloseSVG width={24} height={24} />
+                          ) : (
+                            <EyeOpenSVG width={24} height={24} />
+                          )}
+                        </TouchableOpacity>
+                      </View>
+                      <View style={styles.inputWrap}>
+                        <Text style={styles.label}>Confirm Password</Text>
+                        {errors.confPassword || touched.confPassword ? (
+                          <Text style={styles.errorMessage}>{errors.confPassword}</Text>
+                        ) : (
+                          <></>
+                        )}
+                        <TextInput
+                          style={styles.input}
+                          textAlign='left'
+                          secureTextEntry={!isShowPass}
+                          value={values.confPassword}
+                          onChangeText={handleChange("confPassword")}
+                          onBlur={handleBlur("confPassword")}
+                          onFocus={() => {
+                            setIsShowKeyboard(true);
+                          }}
+                        />
+                        <TouchableOpacity
+                          onPress={() => setIsShowPass(!isShowPass)}
+                          style={{ position: "absolute", bottom: 10, right: 0 }}
+                        >
+                          {isShowPass ? (
+                            <EyeCloseSVG width={24} height={24} />
+                          ) : (
+                            <EyeOpenSVG width={24} height={24} />
+                          )}
+                        </TouchableOpacity>
+                      </View>
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => handleSubmit()}
+                        style={styles.loginSubmit}
+                      >
+                        <Text style={styles.submitTitle}>Next</Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
+                </Formik>
               </View>
 
               <TouchableOpacity
@@ -236,10 +346,10 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
                 </Text>
               </TouchableOpacity>
             </View>
-          </KeyboardAwareScrollView>
-        </TouchableWithoutFeedback>
-      </ScrollView>
-    </SafeAreaView>
+          </ScrollView>
+        </SafeAreaView>
+      </KeyboardAwareScrollView>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -388,8 +498,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
   },
+
   loginLink: {
     marginLeft: 10,
     color: "#FFC612",
+  },
+
+  errorMessage: {
+    position: "absolute",
+    top: 20,
+    left: 0,
+    fontWeight: "400",
+    fontSize: 16,
+    color: "#d52121",
   },
 });

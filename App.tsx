@@ -19,11 +19,6 @@ const loadFonts = async () => {
   });
 };
 
-const initialState = {
-  email: "",
-  password: "",
-};
-
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
   const routing = useRoute(false);

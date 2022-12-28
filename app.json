@@ -16,7 +16,9 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "usesIcloudStorage": true,
+      "bundleIdentifier": "com.alinaGitignore44.testNative"
     },
     "android": {
       "adaptiveIcon": {
@@ -26,6 +28,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [["expo-document-picker", { "ICloudContainerEnvironment": "Development" }]]
   }
 }

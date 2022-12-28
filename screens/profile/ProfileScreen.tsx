@@ -23,27 +23,82 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { RootStackParamList } from "../../types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import EditSVG from "../../assets/Edit.svg";
+import * as SQLite from "expo-sqlite";
+import { Formik } from "formik";
+import { validationSchemaEditProfile } from "../../utils/validationShema";
 
 const initialState = {
-  phone: "+440-9655-6954",
-  name: "Mike Tyson",
-  email: "miketyson@gmail.com",
-  position: "UI/UX Designer",
-  skype: "live-miketyson98",
-  photo: "../../assets/Photo.png",
+  phone: "",
+  name: "",
+  email: "",
+  position: "",
+  skype: "",
+  photo: "",
 };
+
+interface IState {
+  phone: string;
+  name: string;
+  email: string;
+  position: string;
+  skype: string;
+  photo: string;
+}
+
+const db = SQLite.openDatabase("MainDB");
 
 type ProfileProps = NativeStackScreenProps<RootStackParamList, "ProfileScreen">;
 const ProfileScreen = ({ navigation }: ProfileProps) => {
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
-  const [state, setState] = useState(initialState);
+  const [state, setState] = useState<IState>(initialState);
 
-  const inputHandlerPhone = (text: string) => setState((prev) => ({ ...prev, phone: text }));
-  const inputHandlerName = (text: string) => setState((prev) => ({ ...prev, name: text }));
-  const inputHandlerEmail = (text: string) => setState((prev) => ({ ...prev, email: text }));
-  const inputHandlerPosition = (text: string) => setState((prev) => ({ ...prev, position: text }));
-  const inputHandlerSkype = (text: string) => setState((prev) => ({ ...prev, skype: text }));
+  useEffect(() => {
+    getData();
+  }, []);
 
+  const getData = () => {
+    try {
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT Name, Phone, Email, Position, Skype, Photo FROM Users",
+          [],
+          (tx, results) => {
+            var len = results.rows.length;
+            if (len > 0) {
+              const name: string = results.rows.item(0).Name;
+              const email: string = results.rows.item(0).Email;
+              const position: string = results.rows.item(0).Position;
+              const skype: string = results.rows.item(0).Skype;
+              const photo: string = results.rows.item(0).Photo;
+              const phone: string = results.rows.item(0).Phone;
+              const state = { phone, name, email, position, skype, photo };
+              setState(state);
+            }
+          }
+        );
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const updateData = async (values: IState) => {
+    try {
+      db.transaction((tx) => {
+        tx.executeSql("UPDATE Users SET Name=?", [values.name]);
+        tx.executeSql("UPDATE Users SET Email=?", [values.email]);
+        tx.executeSql("UPDATE Users SET Phone=?", [values.phone]);
+        tx.executeSql("UPDATE Users SET Position=?", [values.position]);
+        tx.executeSql("UPDATE Users SET Skype=?", [values.skype]);
+
+        () => {
+          Alert.alert("Success!!");
+        };
+        setState(values);
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const keyboardHide = () => {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
@@ -51,12 +106,9 @@ const ProfileScreen = ({ navigation }: ProfileProps) => {
 
   const onLogOut = () => {
     keyboardHide();
-    // Alert.alert("Credentials", `${state}`);
-    // setState(initialState);
     navigation.navigate("LoginScreen");
   };
 
-  const onSave = () => {};
   return (
     <SafeAreaView>
       <ScrollView style={styles.scrollView}>
@@ -77,78 +129,118 @@ const ProfileScreen = ({ navigation }: ProfileProps) => {
                 <Text style={styles.name}>{state.name}</Text>
                 <Text style={styles.position}>{state.position}</Text>
               </View>
-              <View style={{}}>
-                <View style={{ ...styles.inputWrap, marginTop: 0 }}>
-                  <Text style={styles.label}>Name</Text>
-                  <TextInput
-                    style={styles.input}
-                    textAlign='left'
-                    value={state.name}
-                    onChangeText={inputHandlerName}
-                    onFocus={() => {
-                      setIsShowKeyboard(true);
-                    }}
-                  />
-                </View>
-                <View style={styles.inputWrap}>
-                  <Text style={styles.label}>Email</Text>
-                  <TextInput
-                    style={styles.input}
-                    textAlign='left'
-                    value={state.email}
-                    onChangeText={inputHandlerEmail}
-                    onFocus={() => {
-                      setIsShowKeyboard(true);
-                    }}
-                  />
-                </View>
-                <View style={styles.inputWrap}>
-                  <Text style={styles.label}>Phone</Text>
-                  <TextInput
-                    style={styles.input}
-                    textAlign='left'
-                    keyboardType='numeric'
-                    value={state.phone}
-                    onChangeText={inputHandlerPhone}
-                    onFocus={() => {
-                      setIsShowKeyboard(true);
-                    }}
-                  />
-                </View>
-                <View style={styles.inputWrap}>
-                  <Text style={styles.label}>Position</Text>
-                  <TextInput
-                    style={styles.input}
-                    textAlign='left'
-                    value={state.position}
-                    onChangeText={inputHandlerPosition}
-                    onFocus={() => {
-                      setIsShowKeyboard(true);
-                    }}
-                  />
-                </View>
-                <View style={styles.inputWrap}>
-                  <Text style={styles.label}>Skype</Text>
-                  <TextInput
-                    style={styles.input}
-                    textAlign='left'
-                    value={state.skype}
-                    onChangeText={inputHandlerSkype}
-                    onFocus={() => {
-                      setIsShowKeyboard(true);
-                    }}
-                  />
-                </View>
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => {}}
-                  style={styles.profileSubmit}
-                >
-                  <Text style={styles.submitTitle} onPress={onSave}>
-                    Save
-                  </Text>
-                </TouchableOpacity>
-              </View>
+              <Formik
+                initialValues={state}
+                validationSchema={validationSchemaEditProfile}
+                onSubmit={(values, actions) => {
+                  console.log(values);
+                  updateData(values);
+                  actions.resetForm();
+                }}
+              >
+                {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                  <View>
+                    <View style={{ ...styles.inputWrap, marginTop: 0 }}>
+                      <Text style={styles.label}>Name</Text>
+                      {errors.name && touched.name ? (
+                        <Text style={styles.errorMessage}>{errors.name}</Text>
+                      ) : (
+                        <></>
+                      )}
+                      <TextInput
+                        style={styles.input}
+                        textAlign='left'
+                        onChangeText={handleChange("name")}
+                        onBlur={handleBlur("name")}
+                        value={values.name}
+                        onFocus={() => {
+                          setIsShowKeyboard(true);
+                        }}
+                      />
+                    </View>
+                    <View style={styles.inputWrap}>
+                      <Text style={styles.label}>Email</Text>
+                      {errors.email && touched.email ? (
+                        <Text style={styles.errorMessage}>{errors.email}</Text>
+                      ) : (
+                        <></>
+                      )}
+                      <TextInput
+                        style={styles.input}
+                        textAlign='left'
+                        onChangeText={handleChange("email")}
+                        onBlur={handleBlur("email")}
+                        value={values.email}
+                        onFocus={() => {
+                          setIsShowKeyboard(true);
+                        }}
+                      />
+                    </View>
+                    <View style={styles.inputWrap}>
+                      <Text style={styles.label}>Phone</Text>
+                      {errors.phone && touched.phone ? (
+                        <Text style={styles.errorMessage}>{errors.phone}</Text>
+                      ) : (
+                        <></>
+                      )}
+                      <TextInput
+                        style={styles.input}
+                        textAlign='left'
+                        keyboardType='numeric'
+                        onChangeText={handleChange("phone")}
+                        onBlur={handleBlur("phone")}
+                        value={values.phone}
+                        onFocus={() => {
+                          setIsShowKeyboard(true);
+                        }}
+                      />
+                    </View>
+                    <View style={styles.inputWrap}>
+                      <Text style={styles.label}>Position</Text>
+                      {errors.position && touched.position ? (
+                        <Text style={styles.errorMessage}>{errors.position}</Text>
+                      ) : (
+                        <></>
+                      )}
+                      <TextInput
+                        style={styles.input}
+                        textAlign='left'
+                        onChangeText={handleChange("position")}
+                        onBlur={handleBlur("position")}
+                        value={values.position}
+                        onFocus={() => {
+                          setIsShowKeyboard(true);
+                        }}
+                      />
+                    </View>
+                    <View style={styles.inputWrap}>
+                      <Text style={styles.label}>Skype</Text>
+                      {errors.skype && touched.skype ? (
+                        <Text style={styles.errorMessage}>{errors.skype}</Text>
+                      ) : (
+                        <></>
+                      )}
+                      <TextInput
+                        style={styles.input}
+                        textAlign='left'
+                        onChangeText={handleChange("skype")}
+                        onBlur={handleBlur("skype")}
+                        value={values.skype}
+                        onFocus={() => {
+                          setIsShowKeyboard(true);
+                        }}
+                      />
+                    </View>
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      onPress={() => handleSubmit()}
+                      style={styles.profileSubmit}
+                    >
+                      <Text style={styles.submitTitle}>Save</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </Formik>
             </View>
           </KeyboardAwareScrollView>
         </TouchableWithoutFeedback>
@@ -265,5 +357,14 @@ const styles = StyleSheet.create({
     textTransform: "capitalize",
     color: "#1F1D1D",
     textAlign: "center",
+  },
+
+  errorMessage: {
+    position: "absolute",
+    top: 20,
+    left: 0,
+    fontWeight: "400",
+    fontSize: 16,
+    color: "#d52121",
   },
 });
