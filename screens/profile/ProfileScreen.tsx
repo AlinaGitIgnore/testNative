@@ -23,7 +23,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { RootStackParamList } from "../../types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import EditSVG from "../../assets/Edit.svg";
-import * as SQLite from "expo-sqlite";
+// import * as SQLite from "expo-sqlite";
 import { Formik } from "formik";
 import { validationSchemaEditProfile } from "../../utils/validationShema";
 
@@ -45,60 +45,54 @@ interface IState {
   photo: string;
 }
 
-const db = SQLite.openDatabase("MainDB");
+// const db = SQLite.openDatabase("MainDB");
 
 type ProfileProps = NativeStackScreenProps<RootStackParamList, "ProfileScreen">;
 const ProfileScreen = ({ navigation }: ProfileProps) => {
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
   const [state, setState] = useState<IState>(initialState);
 
-  useEffect(() => {
-    getData();
-  }, []);
+  // useEffect(() => {
+  //   getData();
+  // }, []);
 
-  const getData = () => {
-    try {
-      db.transaction((tx) => {
-        tx.executeSql(
-          "SELECT Name, Phone, Email, Position, Skype, Photo FROM Users",
-          [],
-          (tx, results) => {
-            var len = results.rows.length;
-            if (len > 0) {
-              const name: string = results.rows.item(0).Name;
-              const email: string = results.rows.item(0).Email;
-              const position: string = results.rows.item(0).Position;
-              const skype: string = results.rows.item(0).Skype;
-              const photo: string = results.rows.item(0).Photo;
-              const phone: string = results.rows.item(0).Phone;
-              const state = { phone, name, email, position, skype, photo };
-              setState(state);
-            }
-          }
-        );
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  const updateData = async (values: IState) => {
-    try {
-      db.transaction((tx) => {
-        tx.executeSql("UPDATE Users SET Name=?", [values.name]);
-        tx.executeSql("UPDATE Users SET Email=?", [values.email]);
-        tx.executeSql("UPDATE Users SET Phone=?", [values.phone]);
-        tx.executeSql("UPDATE Users SET Position=?", [values.position]);
-        tx.executeSql("UPDATE Users SET Skype=?", [values.skype]);
+  // const getData = () => {
+  //   try {
+  //     db.transaction((tx) => {
+  //        txn.executeSql(`SELECT * FROM users WHERE email = ?`, [values.email], (_, { rows }) => {
+  // if (rows._array.length == 0) {
+  //             const name: string = results.rows.item(0).Name;
+  //             const email: string = results.rows.item(0).Email;
+  //             const position: string = results.rows.item(0).Position;
+  //             const skype: string = results.rows.item(0).Skype;
+  //             const photo: string = results.rows.item(0).Photo;
+  //             const phone: string = results.rows.item(0).Phone;
+  //             const state = { phone, name, email, position, skype, photo };
+  //             setState(state);
+  //           }
+  //         }
+  //       );
+  //     });
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+  // const updateData = async (values: IState) => {
+  //
+  //     db.transaction((tx) => {
+  //       tx.executeSql("UPDATE Users SET Name=?", [values.name]);
+  //       tx.executeSql("UPDATE Users SET Email=?", [values.email]);
+  //       tx.executeSql("UPDATE Users SET Phone=?", [values.phone]);
+  //       tx.executeSql("UPDATE Users SET Position=?", [values.position]);
+  //       tx.executeSql("UPDATE Users SET Skype=?", [values.skype]);
 
-        () => {
-          Alert.alert("Success!!");
-        };
-        setState(values);
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  //       () => {
+  //         Alert.alert("Successfully!!");
+  //       };
+  //       setState(values);
+  //     });
+  //
+  // };
   const keyboardHide = () => {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
@@ -134,7 +128,7 @@ const ProfileScreen = ({ navigation }: ProfileProps) => {
                 validationSchema={validationSchemaEditProfile}
                 onSubmit={(values, actions) => {
                   console.log(values);
-                  updateData(values);
+                  // updateData(values);
                   actions.resetForm();
                 }}
               >

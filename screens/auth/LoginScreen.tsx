@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import React, { useEffect } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import EyeOpenSVG from "../../assets/eyeOpen.svg";
 import EyeCloseSVG from "../../assets/eyeClose.svg";
 import LogoSVG from "../../assets/logo.svg";
-import * as SQLite from "expo-sqlite";
 import {
   TouchableOpacity,
   StyleSheet,
@@ -22,36 +21,57 @@ import {
 import { Formik } from "formik";
 import { validationSchemaLogin } from "../../utils/validationShema";
 import { RootStackParamList } from "../../types";
-const db = SQLite.openDatabase("MainDB.db");
+import * as SQLite from "expo-sqlite";
+import { SQLError, SQLTransaction } from "expo-sqlite/build/SQLite.types";
 
 const window = Dimensions.get("window");
 const screen = Dimensions.get("screen");
 
 type LoginProps = NativeStackScreenProps<RootStackParamList, "LoginScreen">;
 const initialState = {
+  id: null,
   email: "",
+  name: "",
+  position: "",
+  skype: "",
+  phone: "",
   password: "",
 };
 
+const db = SQLite.openDatabase("MainDb");
 export default function LoginScreen({ navigation }: LoginProps) {
   const [dimensions, setDimensions] = useState({ window, screen });
 
-  const getUser = async () => {
-    try {
-      await db.transaction(async (tx) => {
-        await tx.executeSql("SELECT Email, Password FROM Users", [], (tx, results) => {
-          const len = results.rows.length;
-          if (len > 0) {
-            const email = results.rows.item(0).Email;
-            const password = results.rows.item(0).Password;
-            setState({ email, password });
+  useEffect(() => {
+    db.transaction((tx) => {
+      const query = `CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT, phone TEXT, name TEXT, password TEXT, position TEXT, skype TEXT);`;
+      tx.executeSql(query);
+    });
+  }, []);
+
+  const getUser = (values: { email: string; password: string }) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        `SELECT * FROM users WHERE email = ?`,
+        [values.email],
+        (_, { rows }) => {
+          if (rows._array.length == 0) {
+            Alert.alert("This user is not registered. Check your email or go to registration.");
+          } else {
+            if (rows._array[0].password === values.password) {
+              Alert.alert("This user was found.");
+            } else {
+              Alert.alert("Incorrect password.");
+            }
           }
-        });
-      });
-      navigation.navigate("ProfileScreen");
-    } catch (error) {
-      console.log(error);
-    }
+        },
+        (_: SQLTransaction, error: SQLError) => {
+          console.log(error);
+          Alert.alert("Something went wrong!");
+          return true;
+        }
+      );
+    });
   };
 
   useEffect(() => {
@@ -69,10 +89,6 @@ export default function LoginScreen({ navigation }: LoginProps) {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
   };
-  const onLogin = () => {
-    keyboardHide();
-    Alert.alert("Credentials", `${state.email} + ${state.password}`);
-  };
 
   return (
     <TouchableWithoutFeedback onPress={keyboardHide}>
@@ -87,7 +103,8 @@ export default function LoginScreen({ navigation }: LoginProps) {
             initialValues={initialState}
             validationSchema={validationSchemaLogin}
             onSubmit={(values, actions) => {
-              console.log(values);
+              keyboardHide();
+              getUser(values);
               actions.resetForm();
             }}
           >

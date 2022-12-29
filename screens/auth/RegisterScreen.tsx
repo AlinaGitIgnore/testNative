@@ -23,19 +23,16 @@ import {
   StatusBar,
 } from "react-native";
 import { RootStackParamList } from "../../types";
-import { MaterialIcons } from "@expo/vector-icons";
 import LogoSVG from "../../assets/logo.svg";
 import ArrowDownSVG from "../../assets/arrowDown.svg";
 import EyeOpenSVG from "../../assets/eyeOpen.svg";
 import EyeCloseSVG from "../../assets/eyeClose.svg";
 import CodeInputs from "../../components/CodeInput/CodeInput";
 import PhoneInputComponent from "../../components/PhoneInput/PhoneInput";
-import * as SQLite from "expo-sqlite";
 import { Formik } from "formik";
 import { validationSchemaRegister } from "../../utils/validationShema";
-import * as Sharing from "expo-sharing";
-import * as FileSystem from "expo-file-system";
-import * as DocumentPicker from "expo-document-picker";
+import * as SQLite from "expo-sqlite";
+import { SQLError, SQLTransaction } from "expo-sqlite/build/SQLite.types";
 
 const initialState = {
   name: "",
@@ -51,10 +48,17 @@ const screen = Dimensions.get("screen");
 //   { label: "+2", value: "+2" },
 //   { label: "+3", value: "+3" },
 // ];
-
+interface IRegistrationValues {
+  name: string;
+  email: string;
+  password: string;
+  confPassword: string;
+}
 type RegisterProps = NativeStackScreenProps<RootStackParamList, "RegisterScreen">;
+const db = SQLite.openDatabase("MainDb");
+
 export default function RegisterScreen({ navigation }: RegisterProps) {
-  const [db, setDb] = useState(SQLite.openDatabase("MainDb.db"));
+  // const [db, setDb] = useState(SQLite.openDatabase("MainDb.db"));
   // const [items, setItems] = useState(data);
   // const [isOpen, setIsOpen] = useState(false);
   // const [code, setCode] = useState("+1");
@@ -65,35 +69,13 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
   const [isShowConfPass, setIsShowConfPass] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const exportDb = async () => {
-    await Sharing.shareAsync(FileSystem.documentDirectory + "SQLite/MainDb.db");
-  };
-
-  const importDb = async () => {
-    let result = await DocumentPicker.getDocumentAsync({
-      copyToCacheDirectory: true,
+  useEffect(() => {
+    db.transaction((tx) => {
+      const query = `CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT, phone TEXT, name TEXT, password TEXT, position TEXT, skype TEXT);`;
+      tx.executeSql(query);
     });
+  }, []);
 
-    if (result.type === "success") {
-      setIsLoading(true);
-
-      if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + "SQLite")).exists) {
-        await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + "SQLite");
-      }
-
-      const base64 = await FileSystem.readAsStringAsync(result.uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
-      await FileSystem.writeAsStringAsync(
-        FileSystem.documentDirectory + "SQLite/example.db",
-        base64,
-        { encoding: FileSystem.EncodingType.Base64 }
-      );
-      await db.closeAsync();
-      setDb(SQLite.openDatabase("example.db"));
-    }
-  };
   useEffect(() => {
     const subscription = Dimensions.addEventListener("change", ({ window, screen }) => {
       setDimensions({ window, screen });
@@ -101,42 +83,22 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
     return () => subscription?.remove();
   });
 
-  useEffect(() => {
-    createTable();
-  }, []);
-
-  const createTable = () => {
-    db.transaction((tx: { executeSql: (arg0: string) => any }) =>
-      tx.executeSql(
-        "CREATE TABLE IF NOT EXIST " +
-          "Users " +
-          "(ID INTEGER PRIMARY KEY AUTOINCREMENT, Email TEXT, Phone TEXT, Name TEXT, Password TEXT, Position TEXT, Skype TEXT);"
-      )
-    );
+  const addUser = async (values: IRegistrationValues) => {
     db.transaction((tx) => {
-      tx.executeSql("SELECT");
+      const queryDefaultUser = `INSERT INTO users (email, phone, name, password, position, skype) VALUES ('${values.email}', '${number}', '${values.name}', '${values.password}', '', '')`;
+      tx.executeSql(
+        queryDefaultUser,
+        [],
+        (_, { rows }) => {
+          Alert.alert("Registration successfully");
+        },
+        (_: SQLTransaction, error: SQLError) => {
+          console.log(error);
+          Alert.alert("Something went wrong!");
+          return true;
+        }
+      );
     });
-  };
-
-  interface IValues {
-    name: string;
-    email: string;
-    password: string;
-    confPassword: string;
-  }
-  const addUser = async (values: IValues) => {
-    try {
-      await db.transaction((tx) => {
-        tx.executeSql("INSERT INTO Users (Email, Phone, Name, Password) VALUES (?, ?)", [
-          values.email,
-          number,
-          values.name,
-          values.password,
-        ]);
-      });
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   const keyboardHide = () => {
@@ -223,7 +185,6 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
                   initialValues={initialState}
                   validationSchema={validationSchemaRegister}
                   onSubmit={(values, actions) => {
-                    console.log(values);
                     addUser(values);
                     actions.resetForm();
                   }}
