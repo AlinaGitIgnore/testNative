@@ -33,6 +33,8 @@ import { Formik } from "formik";
 import { validationSchemaRegister } from "../../utils/validationShema";
 import * as SQLite from "expo-sqlite";
 import { SQLError, SQLTransaction } from "expo-sqlite/build/SQLite.types";
+import { useAppDispatch } from "../../redux/hook";
+import { setUser, loginUser } from "../../redux/auth/authSlice";
 
 const initialState = {
   name: "",
@@ -57,11 +59,12 @@ interface IRegistrationValues {
 type RegisterProps = NativeStackScreenProps<RootStackParamList, "RegisterScreen">;
 const db = SQLite.openDatabase("MainDb");
 
-export default function RegisterScreen({ navigation }: RegisterProps) {
+const RegisterScreen: React.FC<RegisterProps> = ({ navigation }) => {
   // const [db, setDb] = useState(SQLite.openDatabase("MainDb.db"));
   // const [items, setItems] = useState(data);
   // const [isOpen, setIsOpen] = useState(false);
   // const [code, setCode] = useState("+1");
+  const dispatch = useAppDispatch();
   const [dimensions, setDimensions] = useState({ window, screen });
   const [number, setNumber] = useState("");
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
@@ -91,6 +94,23 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
         [],
         (_, { rows }) => {
           Alert.alert("Registration successfully");
+        },
+        (_: SQLTransaction, error: SQLError) => {
+          console.log(error);
+          Alert.alert("Something went wrong!");
+          return true;
+        }
+      );
+      tx.executeSql(
+        `SELECT * FROM users WHERE email = ?`,
+        [values.email],
+        (_, { rows }) => {
+          if (rows._array.length == 0) {
+            Alert.alert("This user is not registered. Check your email or go to registration.");
+          } else {
+            dispatch(setUser(rows._array[0]));
+            dispatch(loginUser(true));
+          }
         },
         (_: SQLTransaction, error: SQLError) => {
           console.log(error);
@@ -312,7 +332,9 @@ export default function RegisterScreen({ navigation }: RegisterProps) {
       </KeyboardAwareScrollView>
     </TouchableWithoutFeedback>
   );
-}
+};
+
+export default RegisterScreen;
 
 const styles = StyleSheet.create({
   container: {

@@ -23,6 +23,8 @@ import { validationSchemaLogin } from "../../utils/validationShema";
 import { RootStackParamList } from "../../types";
 import * as SQLite from "expo-sqlite";
 import { SQLError, SQLTransaction } from "expo-sqlite/build/SQLite.types";
+import { useAppDispatch, useAppSelector } from "../../redux/hook";
+import { setUser, loginUser } from "../../redux/auth/authSlice";
 
 const window = Dimensions.get("window");
 const screen = Dimensions.get("screen");
@@ -39,7 +41,9 @@ const initialState = {
 };
 
 const db = SQLite.openDatabase("MainDb");
-export default function LoginScreen({ navigation }: LoginProps) {
+
+const LoginScreen: React.FC<LoginProps> = ({ navigation }) => {
+  const dispatch = useAppDispatch();
   const [dimensions, setDimensions] = useState({ window, screen });
 
   useEffect(() => {
@@ -59,7 +63,8 @@ export default function LoginScreen({ navigation }: LoginProps) {
             Alert.alert("This user is not registered. Check your email or go to registration.");
           } else {
             if (rows._array[0].password === values.password) {
-              Alert.alert("This user was found.");
+              dispatch(setUser(rows._array[0]));
+              dispatch(loginUser(true));
             } else {
               Alert.alert("Incorrect password.");
             }
@@ -183,7 +188,9 @@ export default function LoginScreen({ navigation }: LoginProps) {
       </View>
     </TouchableWithoutFeedback>
   );
-}
+};
+
+export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {

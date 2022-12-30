@@ -26,31 +26,16 @@ import EditSVG from "../../assets/Edit.svg";
 // import * as SQLite from "expo-sqlite";
 import { Formik } from "formik";
 import { validationSchemaEditProfile } from "../../utils/validationShema";
-
-const initialState = {
-  phone: "",
-  name: "",
-  email: "",
-  position: "",
-  skype: "",
-  photo: "",
-};
-
-interface IState {
-  phone: string;
-  name: string;
-  email: string;
-  position: string;
-  skype: string;
-  photo: string;
-}
+import { useAppDispatch, useAppSelector } from "../../redux/hook";
+import { loginUser, setUser } from "../../redux/auth/authSlice";
 
 // const db = SQLite.openDatabase("MainDB");
 
 type ProfileProps = NativeStackScreenProps<RootStackParamList, "ProfileScreen">;
-const ProfileScreen = ({ navigation }: ProfileProps) => {
+const ProfileScreen: React.FC<ProfileProps> = ({ navigation }) => {
+  const dispatch = useAppDispatch();
+  const profile = useAppSelector((state) => state.profile);
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
-  const [state, setState] = useState<IState>(initialState);
 
   // useEffect(() => {
   //   getData();
@@ -89,7 +74,7 @@ const ProfileScreen = ({ navigation }: ProfileProps) => {
   //       () => {
   //         Alert.alert("Successfully!!");
   //       };
-  //       setState(values);
+  //       dispatch(setUser(values));
   //     });
   //
   // };
@@ -99,8 +84,8 @@ const ProfileScreen = ({ navigation }: ProfileProps) => {
   };
 
   const onLogOut = () => {
+    dispatch(loginUser(false));
     keyboardHide();
-    navigation.navigate("LoginScreen");
   };
 
   return (
@@ -120,11 +105,11 @@ const ProfileScreen = ({ navigation }: ProfileProps) => {
                   <Image source={require("../../assets/Photo.png")} />
                   <EditSVG style={{ position: "absolute", top: 50, right: 0 }} />
                 </TouchableOpacity>
-                <Text style={styles.name}>{state.name}</Text>
-                <Text style={styles.position}>{state.position}</Text>
+                <Text style={styles.name}>{profile.name}</Text>
+                <Text style={styles.position}>{profile.position}</Text>
               </View>
               <Formik
-                initialValues={state}
+                initialValues={profile}
                 validationSchema={validationSchemaEditProfile}
                 onSubmit={(values, actions) => {
                   console.log(values);
