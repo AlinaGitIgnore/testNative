@@ -40,7 +40,7 @@ const initialState = {
   password: "",
 };
 
-const db = SQLite.openDatabase("MainDb");
+const db = SQLite.openDatabase("userDb");
 
 const LoginScreen: React.FC<LoginProps> = ({ navigation }) => {
   const dispatch = useAppDispatch();

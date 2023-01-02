@@ -29,16 +29,18 @@ import { validationSchemaEditProfile } from "../../utils/validationShema";
 import { useAppDispatch, useAppSelector } from "../../redux/hook";
 import { loginUser, setUser } from "../../redux/auth/authSlice";
 import { SQLError, SQLTransaction } from "expo-sqlite";
+import CreatePhoto from "../../components/CreatePhoto/CreatePhoto";
 
-const db = SQLite.openDatabase("MainDb");
+const db = SQLite.openDatabase("userDb");
 
 type ProfileProps = NativeStackScreenProps<RootStackParamList, "ProfileScreen">;
 const ProfileScreen: React.FC<ProfileProps> = ({ navigation }) => {
   const dispatch = useAppDispatch();
   const profile = useAppSelector((state) => state.profile);
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+  const [isShowCamera, setIsShowCamera] = useState(false);
 
-  const updateData = async (values: any) => {
+  const updateData = (values: any) => {
     db.transaction((tx) => {
       const query = `UPDATE users SET name = '${values.name}',  email = '${values.email}', phone = '${values.phone}', position = '${values.position}', skype = '${values.skype}' WHERE id = ${profile.id}`;
       tx.executeSql(
@@ -75,6 +77,33 @@ const ProfileScreen: React.FC<ProfileProps> = ({ navigation }) => {
     keyboardHide();
   };
 
+  const updatePhoto = (uri: any) => {
+    db.transaction((tx) => {
+      const query = `UPDATE users SET photo = '${uri}' WHERE id = ${profile.id}`;
+      tx.executeSql(
+        query,
+        [],
+        () => {
+          Alert.alert("Successfully!!");
+        },
+
+        (_: SQLTransaction, error: SQLError) => {
+          console.log(error);
+          Alert.alert("Something went wrong!");
+          return true;
+        }
+      );
+
+      tx.executeSql(`SELECT * FROM users WHERE id = ?`, [profile.id], (_, { rows }) => {
+        if (rows._array.length == 0) {
+          Alert.alert("This user is not registered. Check your email or go to registration.");
+        } else {
+          dispatch(setUser(rows._array[0]));
+        }
+      });
+    });
+    setIsShowCamera(false);
+  };
   return (
     <SafeAreaView>
       <ScrollView style={styles.scrollView}>
@@ -87,14 +116,20 @@ const ProfileScreen: React.FC<ProfileProps> = ({ navigation }) => {
                   <Text style={styles.linkText}>Log Out</Text>
                 </TouchableOpacity>
               </View>
-              <View style={styles.mainInfo}>
-                <TouchableOpacity onPress={() => {}}>
-                  <Image source={require("../../assets/Photo.png")} />
-                  <EditSVG style={{ position: "absolute", top: 50, right: 0 }} />
-                </TouchableOpacity>
-                <Text style={styles.name}>{profile.name}</Text>
-                <Text style={styles.position}>{profile.position}</Text>
-              </View>
+              {isShowCamera && <CreatePhoto setPhoto={updatePhoto} />}
+              {!isShowCamera && (
+                <View style={styles.mainInfo}>
+                  <TouchableOpacity onPress={() => setIsShowCamera(true)}>
+                    <Image
+                      source={{ uri: profile.photo }}
+                      style={{ width: 70, height: 70, borderRadius: 35 }}
+                    />
+                    <EditSVG style={{ position: "absolute", top: 50, right: 0 }} />
+                  </TouchableOpacity>
+                  <Text style={styles.name}>{profile.name}</Text>
+                  <Text style={styles.position}>{profile.position}</Text>
+                </View>
+              )}
               <Formik
                 initialValues={profile}
                 validationSchema={validationSchemaEditProfile}
