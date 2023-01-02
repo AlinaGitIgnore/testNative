@@ -135,7 +135,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation }) => {
                 </View>
                 <View style={styles.inputWrap}>
                   <Text style={styles.label}>Password</Text>
-                  {errors.password || touched.password ? (
+                  {errors.password && touched.password ? (
                     <Text style={styles.errorMessage}>{errors.password}</Text>
                   ) : (
                     <></>
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
   },
   newUserWrap: {
     alignSelf: "center",
-    marginTop: 35,
+    // marginTop: 35,
   },
 
   createUserLink: {

@@ -250,7 +250,7 @@ const RegisterScreen: React.FC<RegisterProps> = ({ navigation }) => {
                       </View>
                       <View style={styles.inputWrap}>
                         <Text style={styles.label}>Password</Text>
-                        {errors.password || touched.password ? (
+                        {errors.password && touched.password ? (
                           <Text style={styles.errorMessage}>{errors.password}</Text>
                         ) : (
                           <></>
@@ -279,7 +279,7 @@ const RegisterScreen: React.FC<RegisterProps> = ({ navigation }) => {
                       </View>
                       <View style={styles.inputWrap}>
                         <Text style={styles.label}>Confirm Password</Text>
-                        {errors.confPassword || touched.confPassword ? (
+                        {errors.confPassword && touched.confPassword ? (
                           <Text style={styles.errorMessage}>{errors.confPassword}</Text>
                         ) : (
                           <></>
@@ -296,10 +296,10 @@ const RegisterScreen: React.FC<RegisterProps> = ({ navigation }) => {
                           }}
                         />
                         <TouchableOpacity
-                          onPress={() => setIsShowPass(!isShowPass)}
+                          onPress={() => setIsShowConfPass(!isShowConfPass)}
                           style={{ position: "absolute", bottom: 10, right: 0 }}
                         >
-                          {isShowPass ? (
+                          {isShowConfPass ? (
                             <EyeCloseSVG width={24} height={24} />
                           ) : (
                             <EyeOpenSVG width={24} height={24} />

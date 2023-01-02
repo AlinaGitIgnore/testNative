@@ -24,56 +24,55 @@ const PhoneInputComponent: React.FC<IProps> = ({ value, setValue }) => {
   const [countryCode, setCountryCode] = useState("");
   const [formattedValue, setFormattedValue] = useState("");
   const [valid, setValid] = useState(false);
-  const [disabled, setDisabled] = useState(false);
 
   const phoneInput = useRef<PhoneInput>(null);
 
   return (
     <>
       <StatusBar barStyle='dark-content' />
-      <Formik
-        initialValues={{ phone: "" }}
-        validationSchema={validationSchemaPhone}
-        onSubmit={(values, actions) => {
-          console.log(values);
-          actions.resetForm();
-        }}
-      >
-        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-          <View>
-            {errors.phone && touched.phone ? (
-              <Text style={styles.errorMessage}>{errors.phone}</Text>
-            ) : (
-              <></>
-            )}
-            <SafeAreaView>
-              <ArrowDownSVG width={10} height={5} style={styles.openSelect} />
-              <PhoneInput
-                countryPickerButtonStyle={{ width: 70, marginRight: 35 }}
-                containerStyle={styles.containerStyle}
-                disableArrowIcon={true}
-                textInputStyle={styles.textInputStyle}
-                codeTextStyle={styles.codeTextStyle}
-                textContainerStyle={styles.textContainerStyle}
-                ref={phoneInput}
-                defaultValue={value}
-                defaultCode='IN'
-                layout='second'
-                value={values.phone}
-                onChangeText={handleChange("phone")}
-                onChangeFormattedText={(text) => {
-                  setFormattedValue(text);
-                  setCountryCode(phoneInput.current?.getCountryCode() || "");
-                }}
-                countryPickerProps={{ withAlphaFilter: true }}
-                disabled={disabled}
-                withDarkTheme={false}
-                autoFocus
-              />
-            </SafeAreaView>
-          </View>
+
+      <SafeAreaView>
+        {valid && (
+          <Text style={styles.errorMessage}>
+            {formattedValue}
+            <Text> not valid!</Text>
+          </Text>
         )}
-      </Formik>
+        <ArrowDownSVG width={10} height={5} style={styles.openSelect} />
+        <PhoneInput
+          countryPickerButtonStyle={{ width: 70, marginRight: 35 }}
+          containerStyle={styles.containerStyle}
+          disableArrowIcon={true}
+          textInputStyle={styles.textInputStyle}
+          codeTextStyle={styles.codeTextStyle}
+          textContainerStyle={styles.textContainerStyle}
+          ref={phoneInput}
+          defaultValue={value}
+          layout='second'
+          defaultCode='UA'
+          value={value}
+          onChangeText={(text) => {
+            const checkValid = phoneInput.current?.isValidNumber(value);
+            setValid(checkValid ? checkValid : false);
+            setCountryCode(phoneInput.current?.getCountryCode() || "");
+            let getNumberAfterPossiblyEliminatingZero =
+              phoneInput.current?.getNumberAfterPossiblyEliminatingZero();
+            console.log(getNumberAfterPossiblyEliminatingZero);
+
+            const code = phoneInput.current?.state.code;
+            const number = `${code}${text}`;
+            setValue(number);
+          }}
+          onChangeFormattedText={(text) => {
+            setFormattedValue(text);
+            setCountryCode(phoneInput.current?.getCountryCode() || "");
+          }}
+          countryPickerProps={{ withAlphaFilter: true }}
+          disabled={false}
+          withDarkTheme={false}
+          autoFocus
+        />
+      </SafeAreaView>
     </>
   );
 };
