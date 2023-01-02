@@ -105,151 +105,149 @@ const ProfileScreen: React.FC<ProfileProps> = ({ navigation }) => {
     setIsShowCamera(false);
   };
   return (
-    <SafeAreaView>
-      <ScrollView style={styles.scrollView}>
-        <TouchableWithoutFeedback onPress={keyboardHide}>
-          <KeyboardAwareScrollView style={{ width: "100%" }}>
-            <View style={styles.container}>
-              <View style={styles.header}>
-                <Text style={styles.title}>Edit profile</Text>
-                <TouchableOpacity onPress={onLogOut} style={styles.linkLogOut}>
-                  <Text style={styles.linkText}>Log Out</Text>
+    <ScrollView style={styles.scrollView}>
+      <TouchableWithoutFeedback onPress={keyboardHide}>
+        <KeyboardAwareScrollView style={{ width: "100%" }}>
+          <View style={styles.container}>
+            <View style={styles.header}>
+              <Text style={styles.title}>Edit profile</Text>
+              <TouchableOpacity onPress={onLogOut} style={styles.linkLogOut}>
+                <Text style={styles.linkText}>Log Out</Text>
+              </TouchableOpacity>
+            </View>
+            {isShowCamera && <CreatePhoto setPhoto={updatePhoto} />}
+            {!isShowCamera && (
+              <View style={styles.mainInfo}>
+                <TouchableOpacity onPress={() => setIsShowCamera(true)}>
+                  <Image
+                    source={
+                      profile.photo !== ""
+                        ? { uri: profile.photo }
+                        : require("../../assets/Photo.png")
+                    }
+                    style={{ width: 70, height: 70, borderRadius: 35 }}
+                  />
+                  <EditSVG style={{ position: "absolute", top: 50, right: 0 }} />
                 </TouchableOpacity>
+                <Text style={styles.name}>{profile.name}</Text>
+                <Text style={styles.position}>{profile.position}</Text>
               </View>
-              {isShowCamera && <CreatePhoto setPhoto={updatePhoto} />}
-              {!isShowCamera && (
-                <View style={styles.mainInfo}>
-                  <TouchableOpacity onPress={() => setIsShowCamera(true)}>
-                    <Image
-                      source={
-                        profile.photo !== ""
-                          ? { uri: profile.photo }
-                          : require("../../assets/Photo.png")
-                      }
-                      style={{ width: 70, height: 70, borderRadius: 35 }}
+            )}
+            <Formik
+              initialValues={profile}
+              validationSchema={validationSchemaEditProfile}
+              onSubmit={(values) => {
+                keyboardHide();
+                updateData(values);
+              }}
+            >
+              {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                <View>
+                  <View style={{ ...styles.inputWrap, marginTop: 0 }}>
+                    <Text style={styles.label}>Name</Text>
+                    {errors.name && touched.name ? (
+                      <Text style={styles.errorMessage}>{errors.name}</Text>
+                    ) : (
+                      <></>
+                    )}
+                    <TextInput
+                      style={styles.input}
+                      textAlign='left'
+                      onChangeText={handleChange("name")}
+                      onBlur={handleBlur("name")}
+                      value={values.name}
+                      onFocus={() => {
+                        setIsShowKeyboard(true);
+                      }}
                     />
-                    <EditSVG style={{ position: "absolute", top: 50, right: 0 }} />
+                  </View>
+                  <View style={styles.inputWrap}>
+                    <Text style={styles.label}>Email</Text>
+                    {errors.email && touched.email ? (
+                      <Text style={styles.errorMessage}>{errors.email}</Text>
+                    ) : (
+                      <></>
+                    )}
+                    <TextInput
+                      style={styles.input}
+                      textAlign='left'
+                      onChangeText={handleChange("email")}
+                      onBlur={handleBlur("email")}
+                      value={values.email}
+                      onFocus={() => {
+                        setIsShowKeyboard(true);
+                      }}
+                    />
+                  </View>
+                  <View style={styles.inputWrap}>
+                    <Text style={styles.label}>Phone</Text>
+                    {errors.phone && touched.phone ? (
+                      <Text style={styles.errorMessage}>{errors.phone}</Text>
+                    ) : (
+                      <></>
+                    )}
+                    <TextInput
+                      style={styles.input}
+                      textAlign='left'
+                      keyboardType='numeric'
+                      onChangeText={handleChange("phone")}
+                      onBlur={handleBlur("phone")}
+                      value={values.phone}
+                      onFocus={() => {
+                        setIsShowKeyboard(true);
+                      }}
+                    />
+                  </View>
+                  <View style={styles.inputWrap}>
+                    <Text style={styles.label}>Position</Text>
+                    {errors.position && touched.position ? (
+                      <Text style={styles.errorMessage}>{errors.position}</Text>
+                    ) : (
+                      <></>
+                    )}
+                    <TextInput
+                      style={styles.input}
+                      textAlign='left'
+                      onChangeText={handleChange("position")}
+                      onBlur={handleBlur("position")}
+                      value={values.position}
+                      onFocus={() => {
+                        setIsShowKeyboard(true);
+                      }}
+                    />
+                  </View>
+                  <View style={styles.inputWrap}>
+                    <Text style={styles.label}>Skype</Text>
+                    {errors.skype && touched.skype ? (
+                      <Text style={styles.errorMessage}>{errors.skype}</Text>
+                    ) : (
+                      <></>
+                    )}
+                    <TextInput
+                      style={styles.input}
+                      textAlign='left'
+                      onChangeText={handleChange("skype")}
+                      onBlur={handleBlur("skype")}
+                      value={values.skype}
+                      onFocus={() => {
+                        setIsShowKeyboard(true);
+                      }}
+                    />
+                  </View>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => handleSubmit()}
+                    style={styles.profileSubmit}
+                  >
+                    <Text style={styles.submitTitle}>Save</Text>
                   </TouchableOpacity>
-                  <Text style={styles.name}>{profile.name}</Text>
-                  <Text style={styles.position}>{profile.position}</Text>
                 </View>
               )}
-              <Formik
-                initialValues={profile}
-                validationSchema={validationSchemaEditProfile}
-                onSubmit={(values) => {
-                  keyboardHide();
-                  updateData(values);
-                }}
-              >
-                {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-                  <View>
-                    <View style={{ ...styles.inputWrap, marginTop: 0 }}>
-                      <Text style={styles.label}>Name</Text>
-                      {errors.name && touched.name ? (
-                        <Text style={styles.errorMessage}>{errors.name}</Text>
-                      ) : (
-                        <></>
-                      )}
-                      <TextInput
-                        style={styles.input}
-                        textAlign='left'
-                        onChangeText={handleChange("name")}
-                        onBlur={handleBlur("name")}
-                        value={values.name}
-                        onFocus={() => {
-                          setIsShowKeyboard(true);
-                        }}
-                      />
-                    </View>
-                    <View style={styles.inputWrap}>
-                      <Text style={styles.label}>Email</Text>
-                      {errors.email && touched.email ? (
-                        <Text style={styles.errorMessage}>{errors.email}</Text>
-                      ) : (
-                        <></>
-                      )}
-                      <TextInput
-                        style={styles.input}
-                        textAlign='left'
-                        onChangeText={handleChange("email")}
-                        onBlur={handleBlur("email")}
-                        value={values.email}
-                        onFocus={() => {
-                          setIsShowKeyboard(true);
-                        }}
-                      />
-                    </View>
-                    <View style={styles.inputWrap}>
-                      <Text style={styles.label}>Phone</Text>
-                      {errors.phone && touched.phone ? (
-                        <Text style={styles.errorMessage}>{errors.phone}</Text>
-                      ) : (
-                        <></>
-                      )}
-                      <TextInput
-                        style={styles.input}
-                        textAlign='left'
-                        keyboardType='numeric'
-                        onChangeText={handleChange("phone")}
-                        onBlur={handleBlur("phone")}
-                        value={values.phone}
-                        onFocus={() => {
-                          setIsShowKeyboard(true);
-                        }}
-                      />
-                    </View>
-                    <View style={styles.inputWrap}>
-                      <Text style={styles.label}>Position</Text>
-                      {errors.position && touched.position ? (
-                        <Text style={styles.errorMessage}>{errors.position}</Text>
-                      ) : (
-                        <></>
-                      )}
-                      <TextInput
-                        style={styles.input}
-                        textAlign='left'
-                        onChangeText={handleChange("position")}
-                        onBlur={handleBlur("position")}
-                        value={values.position}
-                        onFocus={() => {
-                          setIsShowKeyboard(true);
-                        }}
-                      />
-                    </View>
-                    <View style={styles.inputWrap}>
-                      <Text style={styles.label}>Skype</Text>
-                      {errors.skype && touched.skype ? (
-                        <Text style={styles.errorMessage}>{errors.skype}</Text>
-                      ) : (
-                        <></>
-                      )}
-                      <TextInput
-                        style={styles.input}
-                        textAlign='left'
-                        onChangeText={handleChange("skype")}
-                        onBlur={handleBlur("skype")}
-                        value={values.skype}
-                        onFocus={() => {
-                          setIsShowKeyboard(true);
-                        }}
-                      />
-                    </View>
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      onPress={() => handleSubmit()}
-                      style={styles.profileSubmit}
-                    >
-                      <Text style={styles.submitTitle}>Save</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </Formik>
-            </View>
-          </KeyboardAwareScrollView>
-        </TouchableWithoutFeedback>
-      </ScrollView>
-    </SafeAreaView>
+            </Formik>
+          </View>
+        </KeyboardAwareScrollView>
+      </TouchableWithoutFeedback>
+    </ScrollView>
   );
 };
 
@@ -259,7 +257,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     fontFamily: "Poppins-Regular",
-    paddingTop: StatusBar.currentHeight,
+    paddingTop: Platform.OS === "ios" ? 50 : StatusBar.currentHeight,
     backgroundColor: "#fff",
     justifyContent: "center",
     paddingHorizontal: 32,

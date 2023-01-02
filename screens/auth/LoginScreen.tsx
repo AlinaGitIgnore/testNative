@@ -48,7 +48,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation }) => {
 
   useEffect(() => {
     db.transaction((tx) => {
-      const query = `CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT, phone TEXT, name TEXT, password TEXT, position TEXT, skype TEXT);`;
+      const query = `CREATE TABLE IF NOT EXISTS profile (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT, phone TEXT, name TEXT, password TEXT, position TEXT, skype TEXT, photo TEXT);`;
       tx.executeSql(query);
     });
   }, []);
@@ -98,7 +98,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation }) => {
   return (
     <TouchableWithoutFeedback onPress={keyboardHide}>
       <View style={styles.container}>
-        <LogoSVG width={68} height={90} style={{ marginTop: 50 }} />
+        <LogoSVG width={68} height={90} style={{ marginTop: 60 }} />
         <Text style={styles.title}>Log in to workroom</Text>
         <KeyboardAvoidingView
           behavior={Platform.OS == "ios" ? "padding" : "height"}
@@ -194,11 +194,11 @@ export default LoginScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: StatusBar.currentHeight,
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 32,
+    paddingTop: Platform.OS === "ios" ? 50 : StatusBar.currentHeight,
     fontFamily: "Poppins-Regular",
   },
 

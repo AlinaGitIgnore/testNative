@@ -60,10 +60,6 @@ type RegisterProps = NativeStackScreenProps<RootStackParamList, "RegisterScreen"
 const db = SQLite.openDatabase("profileUserDb");
 
 const RegisterScreen: React.FC<RegisterProps> = ({ navigation }) => {
-  // const [db, setDb] = useState(SQLite.openDatabase("profileUserDb.db"));
-  // const [items, setItems] = useState(data);
-  // const [isOpen, setIsOpen] = useState(false);
-  // const [code, setCode] = useState("+1");
   const dispatch = useAppDispatch();
   const [dimensions, setDimensions] = useState({ window, screen });
   const [number, setNumber] = useState("");
@@ -108,7 +104,6 @@ const RegisterScreen: React.FC<RegisterProps> = ({ navigation }) => {
           if (rows._array.length == 0) {
             Alert.alert("This user is not registered. Check your email or go to registration.");
           } else {
-            console.log(rows._array[0]);
             dispatch(setUser(rows._array[0]));
             dispatch(loginUser(true));
           }
@@ -127,209 +122,150 @@ const RegisterScreen: React.FC<RegisterProps> = ({ navigation }) => {
     Keyboard.dismiss();
   };
 
-  // const onRegister = () => {
-  //   keyboardHide();
-  //   setState(initialState);
-  //   setUser();
-  // };
-
-  // const selectValue = (e: any) => {
-  //   setCode(e.target.innerText);
-  //   setIsOpen(!isOpen);
-  // };
-
-  // if (isLoading) {
-  //   return (
-  //     <View>
-  //       <Text style={{ color: "black", marginTop: 100 }}>Loading...</Text>
-  //     </View>
-  //   );
-  // }
   return (
     <TouchableWithoutFeedback onPress={keyboardHide}>
       <KeyboardAwareScrollView style={{ width: "100%" }}>
-        <SafeAreaView>
-          <ScrollView style={styles.scrollView}>
-            <View style={styles.container}>
-              <LogoSVG width={68} height={90} style={{ marginTop: 50 }} />
-              <Text style={styles.title}>Sign Up To workroom</Text>
+        <ScrollView style={styles.scrollView}>
+          <View style={styles.container}>
+            <LogoSVG width={68} height={90} style={{ marginTop: 50 }} />
+            <Text style={styles.title}>Sign Up To workroom</Text>
 
-              <View style={styles.form}>
-                <View style={styles.inputWrap}>
-                  <Text style={styles.label}>Your Phone</Text>
-                  {/* <View style={styles.phoneInputWrap}>
-                    <TouchableOpacity onPress={() => setIsOpen(!isOpen)}>
-                      <View style={styles.phoneCodeWrap}>
-                        <Text style={styles.phoneInput}>{code}</Text>
-                        {
-                          <ArrowDownSVG
-                            width={10}
-                            height={5}
-                            style={[
-                              styles.openSelect,
-                              {
-                                transform: isOpen ? [{ rotate: "180deg" }] : [{ rotate: "0deg" }],
-                              },
-                            ]}
-                          />
-                        }
-                      </View>
-                    </TouchableOpacity>
-                    <View style={{ ...styles.selectList, display: isOpen ? "flex" : "none" }}>
-                      {data.map((item, idx) => (
-                        <Text onPress={(e) => selectValue(e)} style={styles.item} key={idx}>
-                          {item.value}
-                        </Text>
-                      ))}
-                    </View>
-                    <View style={styles.inputNumber}>
+            <View style={styles.form}>
+              <View style={styles.inputWrap}>
+                <Text style={styles.label}>Your Phone</Text>
+                <PhoneInputComponent setValue={setNumber} />
+              </View>
+              <View>
+                <CodeInputs />
+              </View>
+
+              <Formik
+                initialValues={initialState}
+                validationSchema={validationSchemaRegister}
+                onSubmit={(values) => {
+                  keyboardHide();
+                  addUser({ ...values, email: values.email.toLowerCase() });
+                }}
+              >
+                {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                  <>
+                    <View style={styles.inputWrap}>
+                      <Text style={styles.label}>Your Name</Text>
+                      {errors.name && touched.name ? (
+                        <Text style={styles.errorMessage}>{errors.name}</Text>
+                      ) : (
+                        <></>
+                      )}
+
                       <TextInput
-                        placeholder='345 567-23-56'
-                        // keyboardType='numeric'
-                        style={styles.phoneInput}
+                        onChangeText={handleChange("name")}
+                        onBlur={handleBlur("name")}
+                        value={values.name}
+                        style={styles.input}
                         textAlign='left'
-                        value={state.phone}
-                        onChangeText={inputHandlerPhone}
                         onFocus={() => {
                           setIsShowKeyboard(true);
                         }}
                       />
                     </View>
-                  </View> */}
-                  <PhoneInputComponent value={number} setValue={setNumber} />
-                </View>
-                <View>
-                  <CodeInputs />
-                </View>
-
-                <Formik
-                  initialValues={initialState}
-                  validationSchema={validationSchemaRegister}
-                  onSubmit={(values) => {
-                    keyboardHide();
-                    addUser({ ...values, email: values.email.toLowerCase() });
-                  }}
-                >
-                  {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-                    <>
-                      <View style={styles.inputWrap}>
-                        <Text style={styles.label}>Your Name</Text>
-                        {errors.name && touched.name ? (
-                          <Text style={styles.errorMessage}>{errors.name}</Text>
-                        ) : (
-                          <></>
-                        )}
-
-                        <TextInput
-                          onChangeText={handleChange("name")}
-                          onBlur={handleBlur("name")}
-                          value={values.name}
-                          style={styles.input}
-                          textAlign='left'
-                          onFocus={() => {
-                            setIsShowKeyboard(true);
-                          }}
-                        />
-                      </View>
-                      <View style={styles.inputWrap}>
-                        <Text style={styles.label}>Your email</Text>
-                        {errors.email && touched.email ? (
-                          <Text style={styles.errorMessage}>{errors.email}</Text>
-                        ) : (
-                          <></>
-                        )}
-                        <TextInput
-                          onChangeText={handleChange("email")}
-                          onBlur={handleBlur("email")}
-                          value={values.email}
-                          style={styles.input}
-                          textAlign='left'
-                          onFocus={() => {
-                            setIsShowKeyboard(true);
-                          }}
-                        />
-                      </View>
-                      <View style={styles.inputWrap}>
-                        <Text style={styles.label}>Password</Text>
-                        {errors.password && touched.password ? (
-                          <Text style={styles.errorMessage}>{errors.password}</Text>
-                        ) : (
-                          <></>
-                        )}
-                        <TextInput
-                          style={styles.input}
-                          textAlign='left'
-                          secureTextEntry={!isShowPass}
-                          value={values.password}
-                          onChangeText={handleChange("password")}
-                          onBlur={handleBlur("password")}
-                          onFocus={() => {
-                            setIsShowKeyboard(true);
-                          }}
-                        />
-                        <TouchableOpacity
-                          onPress={() => setIsShowPass(!isShowPass)}
-                          style={{ position: "absolute", bottom: 10, right: 0 }}
-                        >
-                          {isShowPass ? (
-                            <EyeCloseSVG width={24} height={24} />
-                          ) : (
-                            <EyeOpenSVG width={24} height={24} />
-                          )}
-                        </TouchableOpacity>
-                      </View>
-                      <View style={styles.inputWrap}>
-                        <Text style={styles.label}>Confirm Password</Text>
-                        {errors.confPassword && touched.confPassword ? (
-                          <Text style={styles.errorMessage}>{errors.confPassword}</Text>
-                        ) : (
-                          <></>
-                        )}
-                        <TextInput
-                          style={styles.input}
-                          textAlign='left'
-                          secureTextEntry={!isShowPass}
-                          value={values.confPassword}
-                          onChangeText={handleChange("confPassword")}
-                          onBlur={handleBlur("confPassword")}
-                          onFocus={() => {
-                            setIsShowKeyboard(true);
-                          }}
-                        />
-                        <TouchableOpacity
-                          onPress={() => setIsShowConfPass(!isShowConfPass)}
-                          style={{ position: "absolute", bottom: 10, right: 0 }}
-                        >
-                          {isShowConfPass ? (
-                            <EyeCloseSVG width={24} height={24} />
-                          ) : (
-                            <EyeOpenSVG width={24} height={24} />
-                          )}
-                        </TouchableOpacity>
-                      </View>
+                    <View style={styles.inputWrap}>
+                      <Text style={styles.label}>Your email</Text>
+                      {errors.email && touched.email ? (
+                        <Text style={styles.errorMessage}>{errors.email}</Text>
+                      ) : (
+                        <></>
+                      )}
+                      <TextInput
+                        onChangeText={handleChange("email")}
+                        onBlur={handleBlur("email")}
+                        value={values.email}
+                        style={styles.input}
+                        textAlign='left'
+                        onFocus={() => {
+                          setIsShowKeyboard(true);
+                        }}
+                      />
+                    </View>
+                    <View style={styles.inputWrap}>
+                      <Text style={styles.label}>Password</Text>
+                      {errors.password && touched.password ? (
+                        <Text style={styles.errorMessage}>{errors.password}</Text>
+                      ) : (
+                        <></>
+                      )}
+                      <TextInput
+                        style={styles.input}
+                        textAlign='left'
+                        secureTextEntry={!isShowPass}
+                        value={values.password}
+                        onChangeText={handleChange("password")}
+                        onBlur={handleBlur("password")}
+                        onFocus={() => {
+                          setIsShowKeyboard(true);
+                        }}
+                      />
                       <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() => handleSubmit()}
-                        style={styles.loginSubmit}
+                        onPress={() => setIsShowPass(!isShowPass)}
+                        style={{ position: "absolute", bottom: 10, right: 0 }}
                       >
-                        <Text style={styles.submitTitle}>Next</Text>
+                        {isShowPass ? (
+                          <EyeCloseSVG width={24} height={24} />
+                        ) : (
+                          <EyeOpenSVG width={24} height={24} />
+                        )}
                       </TouchableOpacity>
-                    </>
-                  )}
-                </Formik>
-              </View>
-
-              <TouchableOpacity
-                onPress={() => navigation.navigate("LoginScreen")}
-                style={styles.existUserWrap}
-              >
-                <Text style={styles.link}>
-                  Have Account? <Text style={styles.loginLink}>Log In</Text>
-                </Text>
-              </TouchableOpacity>
+                    </View>
+                    <View style={styles.inputWrap}>
+                      <Text style={styles.label}>Confirm Password</Text>
+                      {errors.confPassword && touched.confPassword ? (
+                        <Text style={styles.errorMessage}>{errors.confPassword}</Text>
+                      ) : (
+                        <></>
+                      )}
+                      <TextInput
+                        style={styles.input}
+                        textAlign='left'
+                        secureTextEntry={!isShowConfPass}
+                        value={values.confPassword}
+                        onChangeText={handleChange("confPassword")}
+                        onBlur={handleBlur("confPassword")}
+                        onFocus={() => {
+                          setIsShowKeyboard(true);
+                        }}
+                      />
+                      <TouchableOpacity
+                        onPress={() => setIsShowConfPass(!isShowConfPass)}
+                        style={{ position: "absolute", bottom: 10, right: 0 }}
+                      >
+                        {isShowConfPass ? (
+                          <EyeCloseSVG width={24} height={24} />
+                        ) : (
+                          <EyeOpenSVG width={24} height={24} />
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      onPress={() => handleSubmit()}
+                      style={styles.loginSubmit}
+                    >
+                      <Text style={styles.submitTitle}>Next</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </Formik>
             </View>
-          </ScrollView>
-        </SafeAreaView>
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate("LoginScreen")}
+              style={styles.existUserWrap}
+            >
+              <Text style={styles.link}>
+                Have Account? <Text style={styles.loginLink}>Log In</Text>
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       </KeyboardAwareScrollView>
     </TouchableWithoutFeedback>
   );
@@ -340,7 +276,7 @@ export default RegisterScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: StatusBar.currentHeight,
+    paddingTop: Platform.OS === "ios" ? 50 : StatusBar.currentHeight,
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
