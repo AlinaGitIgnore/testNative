@@ -23,13 +23,14 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { RootStackParamList } from "../../types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import EditSVG from "../../assets/Edit.svg";
-// import * as SQLite from "expo-sqlite";
+import * as SQLite from "expo-sqlite";
 import { Formik } from "formik";
 import { validationSchemaEditProfile } from "../../utils/validationShema";
 import { useAppDispatch, useAppSelector } from "../../redux/hook";
 import { loginUser, setUser } from "../../redux/auth/authSlice";
+import { SQLError, SQLTransaction } from "expo-sqlite";
 
-// const db = SQLite.openDatabase("MainDB");
+const db = SQLite.openDatabase("MainDb");
 
 type ProfileProps = NativeStackScreenProps<RootStackParamList, "ProfileScreen">;
 const ProfileScreen: React.FC<ProfileProps> = ({ navigation }) => {
@@ -37,47 +38,33 @@ const ProfileScreen: React.FC<ProfileProps> = ({ navigation }) => {
   const profile = useAppSelector((state) => state.profile);
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
 
-  // useEffect(() => {
-  //   getData();
-  // }, []);
+  const updateData = async (values: any) => {
+    db.transaction((tx) => {
+      const query = `UPDATE users SET name = '${values.name}',  email = '${values.email}', phone = '${values.phone}', position = '${values.position}', skype = '${values.skype}' WHERE id = ${profile.id}`;
+      tx.executeSql(
+        query,
+        [],
+        () => {
+          Alert.alert("Successfully!!");
+        },
 
-  // const getData = () => {
-  //   try {
-  //     db.transaction((tx) => {
-  //        txn.executeSql(`SELECT * FROM users WHERE email = ?`, [values.email], (_, { rows }) => {
-  // if (rows._array.length == 0) {
-  //             const name: string = results.rows.item(0).Name;
-  //             const email: string = results.rows.item(0).Email;
-  //             const position: string = results.rows.item(0).Position;
-  //             const skype: string = results.rows.item(0).Skype;
-  //             const photo: string = results.rows.item(0).Photo;
-  //             const phone: string = results.rows.item(0).Phone;
-  //             const state = { phone, name, email, position, skype, photo };
-  //             setState(state);
-  //           }
-  //         }
-  //       );
-  //     });
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-  // const updateData = async (values: IState) => {
-  //
-  //     db.transaction((tx) => {
-  //       tx.executeSql("UPDATE Users SET Name=?", [values.name]);
-  //       tx.executeSql("UPDATE Users SET Email=?", [values.email]);
-  //       tx.executeSql("UPDATE Users SET Phone=?", [values.phone]);
-  //       tx.executeSql("UPDATE Users SET Position=?", [values.position]);
-  //       tx.executeSql("UPDATE Users SET Skype=?", [values.skype]);
+        (_: SQLTransaction, error: SQLError) => {
+          console.log(error);
+          Alert.alert("Something went wrong!");
+          return true;
+        }
+      );
 
-  //       () => {
-  //         Alert.alert("Successfully!!");
-  //       };
-  //       dispatch(setUser(values));
-  //     });
-  //
-  // };
+      tx.executeSql(`SELECT * FROM users WHERE id = ?`, [profile.id], (_, { rows }) => {
+        if (rows._array.length == 0) {
+          Alert.alert("This user is not registered. Check your email or go to registration.");
+        } else {
+          dispatch(setUser(rows._array[0]));
+        }
+      });
+    });
+  };
+
   const keyboardHide = () => {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
@@ -111,10 +98,8 @@ const ProfileScreen: React.FC<ProfileProps> = ({ navigation }) => {
               <Formik
                 initialValues={profile}
                 validationSchema={validationSchemaEditProfile}
-                onSubmit={(values, actions) => {
-                  console.log(values);
-                  // updateData(values);
-                  actions.resetForm();
+                onSubmit={(values) => {
+                  updateData(values);
                 }}
               >
                 {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (

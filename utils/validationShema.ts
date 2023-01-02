@@ -85,5 +85,5 @@ export const validationSchemaEditProfile = yup.object({
   skype: yup
     .string()
     .min(5, "Your password is too short, min 5 symbols")
-    .required("Please enter your position"),
+    .required("Please enter your skype"),
 });

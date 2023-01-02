@@ -57,11 +57,11 @@ const PhoneInputComponent: React.FC<IProps> = ({ value, setValue }) => {
             setCountryCode(phoneInput.current?.getCountryCode() || "");
             let getNumberAfterPossiblyEliminatingZero =
               phoneInput.current?.getNumberAfterPossiblyEliminatingZero();
-            console.log(getNumberAfterPossiblyEliminatingZero);
-
-            const code = phoneInput.current?.state.code;
-            const number = `${code}${text}`;
-            setValue(number);
+            if (getNumberAfterPossiblyEliminatingZero?.formattedNumber) {
+              setValue(getNumberAfterPossiblyEliminatingZero.formattedNumber);
+            } else {
+              setValue("");
+            }
           }}
           onChangeFormattedText={(text) => {
             setFormattedValue(text);
