@@ -98,7 +98,6 @@ const ProfileScreen: React.FC<ProfileProps> = ({ navigation }) => {
         if (rows._array.length == 0) {
           Alert.alert("This user is not registered. Check your email or go to registration.");
         } else {
-          console.log(rows._array[0]);
           dispatch(setUser(rows._array[0]));
         }
       });
