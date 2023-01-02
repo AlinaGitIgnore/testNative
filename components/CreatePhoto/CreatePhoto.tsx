@@ -38,8 +38,6 @@ const CreatePhoto: React.FC<IProps> = ({ setPhoto }) => {
   };
   const options = {
     quality: 1,
-    base64: true,
-    fixOrientation: true,
     exif: false,
   };
   const takePhoto = async () => {

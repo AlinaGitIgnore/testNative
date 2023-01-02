@@ -57,10 +57,10 @@ interface IRegistrationValues {
   confPassword: string;
 }
 type RegisterProps = NativeStackScreenProps<RootStackParamList, "RegisterScreen">;
-const db = SQLite.openDatabase("userDb");
+const db = SQLite.openDatabase("profileUserDb");
 
 const RegisterScreen: React.FC<RegisterProps> = ({ navigation }) => {
-  // const [db, setDb] = useState(SQLite.openDatabase("userDb.db"));
+  // const [db, setDb] = useState(SQLite.openDatabase("profileUserDb.db"));
   // const [items, setItems] = useState(data);
   // const [isOpen, setIsOpen] = useState(false);
   // const [code, setCode] = useState("+1");
@@ -74,7 +74,7 @@ const RegisterScreen: React.FC<RegisterProps> = ({ navigation }) => {
 
   useEffect(() => {
     db.transaction((tx) => {
-      const query = `CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT, phone TEXT, photo TEXT, name TEXT, password TEXT, position TEXT, skype TEXT);`;
+      const query = `CREATE TABLE IF NOT EXISTS profile (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT, phone TEXT, name TEXT, password TEXT, position TEXT, skype TEXT, photo TEXT);`;
       tx.executeSql(query);
     });
   }, []);
@@ -88,7 +88,7 @@ const RegisterScreen: React.FC<RegisterProps> = ({ navigation }) => {
 
   const addUser = async (values: IRegistrationValues) => {
     db.transaction((tx) => {
-      const queryDefaultUser = `INSERT INTO users (email, phone, name, password, position, skype, photo) VALUES ('${values.email}', '${number}', '${values.name}', '${values.password}', '', '', '')`;
+      const queryDefaultUser = `INSERT INTO profile (email, phone, name, password, position, skype, photo) VALUES ('${values.email}', '${number}', '${values.name}', '${values.password}', '', '', '')`;
       tx.executeSql(
         queryDefaultUser,
         [],
@@ -102,12 +102,13 @@ const RegisterScreen: React.FC<RegisterProps> = ({ navigation }) => {
         }
       );
       tx.executeSql(
-        `SELECT * FROM users WHERE email = ?`,
+        `SELECT * FROM profile WHERE email = ?`,
         [values.email],
         (_, { rows }) => {
           if (rows._array.length == 0) {
             Alert.alert("This user is not registered. Check your email or go to registration.");
           } else {
+            console.log(rows._array[0]);
             dispatch(setUser(rows._array[0]));
             dispatch(loginUser(true));
           }

@@ -31,7 +31,7 @@ import { loginUser, setUser } from "../../redux/auth/authSlice";
 import { SQLError, SQLTransaction } from "expo-sqlite";
 import CreatePhoto from "../../components/CreatePhoto/CreatePhoto";
 
-const db = SQLite.openDatabase("userDb");
+const db = SQLite.openDatabase("profileUserDb");
 
 type ProfileProps = NativeStackScreenProps<RootStackParamList, "ProfileScreen">;
 const ProfileScreen: React.FC<ProfileProps> = ({ navigation }) => {
@@ -42,7 +42,7 @@ const ProfileScreen: React.FC<ProfileProps> = ({ navigation }) => {
 
   const updateData = (values: any) => {
     db.transaction((tx) => {
-      const query = `UPDATE users SET name = '${values.name}',  email = '${values.email}', phone = '${values.phone}', position = '${values.position}', skype = '${values.skype}' WHERE id = ${profile.id}`;
+      const query = `UPDATE profile SET name = '${values.name}',  email = '${values.email}', phone = '${values.phone}', position = '${values.position}', skype = '${values.skype}' WHERE id = ${profile.id}`;
       tx.executeSql(
         query,
         [],
@@ -57,7 +57,7 @@ const ProfileScreen: React.FC<ProfileProps> = ({ navigation }) => {
         }
       );
 
-      tx.executeSql(`SELECT * FROM users WHERE id = ?`, [profile.id], (_, { rows }) => {
+      tx.executeSql(`SELECT * FROM profile WHERE id = ?`, [profile.id], (_, { rows }) => {
         if (rows._array.length == 0) {
           Alert.alert("This user is not registered. Check your email or go to registration.");
         } else {
@@ -79,7 +79,7 @@ const ProfileScreen: React.FC<ProfileProps> = ({ navigation }) => {
 
   const updatePhoto = (uri: any) => {
     db.transaction((tx) => {
-      const query = `UPDATE users SET photo = '${uri}' WHERE id = ${profile.id}`;
+      const query = `UPDATE profile SET photo = '${uri}' WHERE id = ${profile.id}`;
       tx.executeSql(
         query,
         [],
@@ -94,10 +94,11 @@ const ProfileScreen: React.FC<ProfileProps> = ({ navigation }) => {
         }
       );
 
-      tx.executeSql(`SELECT * FROM users WHERE id = ?`, [profile.id], (_, { rows }) => {
+      tx.executeSql(`SELECT * FROM profile WHERE id = ?`, [profile.id], (_, { rows }) => {
         if (rows._array.length == 0) {
           Alert.alert("This user is not registered. Check your email or go to registration.");
         } else {
+          console.log(rows._array[0]);
           dispatch(setUser(rows._array[0]));
         }
       });
@@ -121,7 +122,11 @@ const ProfileScreen: React.FC<ProfileProps> = ({ navigation }) => {
                 <View style={styles.mainInfo}>
                   <TouchableOpacity onPress={() => setIsShowCamera(true)}>
                     <Image
-                      source={{ uri: profile.photo }}
+                      source={
+                        profile.photo !== ""
+                          ? { uri: profile.photo }
+                          : require("../../assets/Photo.png")
+                      }
                       style={{ width: 70, height: 70, borderRadius: 35 }}
                     />
                     <EditSVG style={{ position: "absolute", top: 50, right: 0 }} />

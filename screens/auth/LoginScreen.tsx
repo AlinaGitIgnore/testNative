@@ -40,7 +40,7 @@ const initialState = {
   password: "",
 };
 
-const db = SQLite.openDatabase("userDb");
+const db = SQLite.openDatabase("profileUserDb");
 
 const LoginScreen: React.FC<LoginProps> = ({ navigation }) => {
   const dispatch = useAppDispatch();
@@ -56,7 +56,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation }) => {
   const getUser = (values: { email: string; password: string }) => {
     db.transaction((tx) => {
       tx.executeSql(
-        `SELECT * FROM users WHERE email = ?`,
+        `SELECT * FROM profile WHERE email = ?`,
         [values.email],
         (_, { rows }) => {
           if (rows._array.length == 0) {
