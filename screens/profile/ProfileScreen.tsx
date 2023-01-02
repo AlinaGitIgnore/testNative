@@ -99,6 +99,7 @@ const ProfileScreen: React.FC<ProfileProps> = ({ navigation }) => {
                 initialValues={profile}
                 validationSchema={validationSchemaEditProfile}
                 onSubmit={(values) => {
+                  keyboardHide();
                   updateData(values);
                 }}
               >

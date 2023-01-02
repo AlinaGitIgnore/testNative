@@ -204,9 +204,9 @@ const RegisterScreen: React.FC<RegisterProps> = ({ navigation }) => {
                 <Formik
                   initialValues={initialState}
                   validationSchema={validationSchemaRegister}
-                  onSubmit={(values, actions) => {
-                    addUser(values);
-                    actions.resetForm();
+                  onSubmit={(values) => {
+                    keyboardHide();
+                    addUser({ ...values, email: values.email.toLowerCase() });
                   }}
                 >
                   {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (

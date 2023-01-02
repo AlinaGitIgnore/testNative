@@ -107,10 +107,9 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation }) => {
           <Formik
             initialValues={initialState}
             validationSchema={validationSchemaLogin}
-            onSubmit={(values, actions) => {
+            onSubmit={(values) => {
               keyboardHide();
-              getUser(values);
-              actions.resetForm();
+              getUser({ ...values, email: values.email.toLowerCase() });
             }}
           >
             {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
