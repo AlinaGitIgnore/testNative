@@ -30,7 +30,7 @@ export const validationSchemaRegister = yup.object({
 
   confPassword: yup
     .string()
-    .matches(passwordRegex, "Password must be made up of upper and lower case letters and numbers")
+    .matches(passwordRegex, "Upper and lower case letters and numbers")
     .required("Please confirm your password")
     .when("password", {
       is: (val: string) => (val && val.length > 0 ? true : false),

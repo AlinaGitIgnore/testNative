@@ -1,71 +1,35 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   TouchableOpacity,
   Image,
   StyleSheet,
   Text,
-  TextInput,
   View,
-  Platform,
-  KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
   Alert,
-  Dimensions,
-  FlatList,
-  GestureResponderEvent,
-  TouchableOpacityComponent,
-  SafeAreaView,
   ScrollView,
-  StatusBar,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { RootStackParamList } from "../../types";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { ProfileProps } from "../../types";
 import EditSVG from "../../assets/Edit.svg";
 import * as SQLite from "expo-sqlite";
-import { Formik } from "formik";
-import { validationSchemaEditProfile } from "../../utils/validationShema";
 import { useAppDispatch, useAppSelector } from "../../redux/hook";
 import { loginUser, setUser } from "../../redux/auth/authSlice";
 import { SQLError, SQLTransaction } from "expo-sqlite";
 import CreatePhoto from "../../components/CreatePhoto/CreatePhoto";
+import ProfileForm from "../../components/ProfileForm/ProfileForm";
+import { commonStyles } from "../../commonStyles";
 
 const db = SQLite.openDatabase("profileUserDb");
 
-type ProfileProps = NativeStackScreenProps<RootStackParamList, "ProfileScreen">;
-const ProfileScreen: React.FC<ProfileProps> = ({ navigation }) => {
+const ProfileScreen: React.FC<ProfileProps> = () => {
   const dispatch = useAppDispatch();
   const profile = useAppSelector((state) => state.profile);
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
   const [isShowCamera, setIsShowCamera] = useState(false);
-
-  const updateData = (values: any) => {
-    db.transaction((tx) => {
-      const query = `UPDATE profile SET name = '${values.name}',  email = '${values.email}', phone = '${values.phone}', position = '${values.position}', skype = '${values.skype}' WHERE id = ${profile.id}`;
-      tx.executeSql(
-        query,
-        [],
-        () => {
-          Alert.alert("Successfully!!");
-        },
-
-        (_: SQLTransaction, error: SQLError) => {
-          console.log(error);
-          Alert.alert("Something went wrong!");
-          return true;
-        }
-      );
-
-      tx.executeSql(`SELECT * FROM profile WHERE id = ?`, [profile.id], (_, { rows }) => {
-        if (rows._array.length == 0) {
-          Alert.alert("This user is not registered. Check your email or go to registration.");
-        } else {
-          dispatch(setUser(rows._array[0]));
-        }
-      });
-    });
-  };
 
   const keyboardHide = () => {
     setIsShowKeyboard(false);
@@ -105,173 +69,60 @@ const ProfileScreen: React.FC<ProfileProps> = ({ navigation }) => {
     setIsShowCamera(false);
   };
   return (
-    <ScrollView style={styles.scrollView}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS == "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
       <TouchableWithoutFeedback onPress={keyboardHide}>
-        <KeyboardAwareScrollView style={{ width: "100%" }}>
-          <View style={styles.container}>
-            <View style={styles.header}>
-              <Text style={styles.title}>Edit profile</Text>
-              <TouchableOpacity onPress={onLogOut} style={styles.linkLogOut}>
-                <Text style={styles.linkText}>Log Out</Text>
-              </TouchableOpacity>
-            </View>
-            {isShowCamera && <CreatePhoto setPhoto={updatePhoto} />}
-            {!isShowCamera && (
-              <View style={styles.mainInfo}>
-                <TouchableOpacity onPress={() => setIsShowCamera(true)}>
-                  <Image
-                    source={
-                      profile.photo !== ""
-                        ? { uri: profile.photo }
-                        : require("../../assets/Photo.png")
-                    }
-                    style={{ width: 70, height: 70, borderRadius: 35 }}
-                  />
-                  <EditSVG style={{ position: "absolute", top: 50, right: 0 }} />
+        <KeyboardAwareScrollView style={{ flex: 1 }}>
+          <ScrollView style={{ flex: 1 }}>
+            <View style={commonStyles.container}>
+              <View style={styles.header}>
+                <Text style={styles.title}>Edit profile</Text>
+                <TouchableOpacity onPress={onLogOut} style={styles.linkLogOut}>
+                  <Text style={styles.linkText}>Log Out</Text>
                 </TouchableOpacity>
-                <Text style={styles.name}>{profile.name}</Text>
-                <Text style={styles.position}>{profile.position}</Text>
               </View>
-            )}
-            <Formik
-              initialValues={profile}
-              validationSchema={validationSchemaEditProfile}
-              onSubmit={(values) => {
-                keyboardHide();
-                updateData(values);
-              }}
-            >
-              {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-                <View>
-                  <View style={{ ...styles.inputWrap, marginTop: 0 }}>
-                    <Text style={styles.label}>Name</Text>
-                    {errors.name && touched.name ? (
-                      <Text style={styles.errorMessage}>{errors.name}</Text>
-                    ) : (
-                      <></>
-                    )}
-                    <TextInput
-                      style={styles.input}
-                      textAlign='left'
-                      onChangeText={handleChange("name")}
-                      onBlur={handleBlur("name")}
-                      value={values.name}
-                      onFocus={() => {
-                        setIsShowKeyboard(true);
-                      }}
+              {isShowCamera && <CreatePhoto setPhoto={updatePhoto} />}
+              {!isShowCamera && (
+                <View style={styles.mainInfo}>
+                  <TouchableOpacity onPress={() => setIsShowCamera(true)}>
+                    <Image
+                      source={
+                        profile.photo !== ""
+                          ? { uri: profile.photo }
+                          : require("../../assets/Photo.png")
+                      }
+                      style={{ width: 70, height: 70, borderRadius: 35 }}
                     />
-                  </View>
-                  <View style={styles.inputWrap}>
-                    <Text style={styles.label}>Email</Text>
-                    {errors.email && touched.email ? (
-                      <Text style={styles.errorMessage}>{errors.email}</Text>
-                    ) : (
-                      <></>
-                    )}
-                    <TextInput
-                      style={styles.input}
-                      textAlign='left'
-                      onChangeText={handleChange("email")}
-                      onBlur={handleBlur("email")}
-                      value={values.email}
-                      onFocus={() => {
-                        setIsShowKeyboard(true);
-                      }}
-                    />
-                  </View>
-                  <View style={styles.inputWrap}>
-                    <Text style={styles.label}>Phone</Text>
-                    {errors.phone && touched.phone ? (
-                      <Text style={styles.errorMessage}>{errors.phone}</Text>
-                    ) : (
-                      <></>
-                    )}
-                    <TextInput
-                      style={styles.input}
-                      textAlign='left'
-                      keyboardType='numeric'
-                      onChangeText={handleChange("phone")}
-                      onBlur={handleBlur("phone")}
-                      value={values.phone}
-                      onFocus={() => {
-                        setIsShowKeyboard(true);
-                      }}
-                    />
-                  </View>
-                  <View style={styles.inputWrap}>
-                    <Text style={styles.label}>Position</Text>
-                    {errors.position && touched.position ? (
-                      <Text style={styles.errorMessage}>{errors.position}</Text>
-                    ) : (
-                      <></>
-                    )}
-                    <TextInput
-                      style={styles.input}
-                      textAlign='left'
-                      onChangeText={handleChange("position")}
-                      onBlur={handleBlur("position")}
-                      value={values.position}
-                      onFocus={() => {
-                        setIsShowKeyboard(true);
-                      }}
-                    />
-                  </View>
-                  <View style={styles.inputWrap}>
-                    <Text style={styles.label}>Skype</Text>
-                    {errors.skype && touched.skype ? (
-                      <Text style={styles.errorMessage}>{errors.skype}</Text>
-                    ) : (
-                      <></>
-                    )}
-                    <TextInput
-                      style={styles.input}
-                      textAlign='left'
-                      onChangeText={handleChange("skype")}
-                      onBlur={handleBlur("skype")}
-                      value={values.skype}
-                      onFocus={() => {
-                        setIsShowKeyboard(true);
-                      }}
-                    />
-                  </View>
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() => handleSubmit()}
-                    style={styles.profileSubmit}
-                  >
-                    <Text style={styles.submitTitle}>Save</Text>
+                    <EditSVG style={{ position: "absolute", top: 50, right: 0 }} />
                   </TouchableOpacity>
+                  <Text style={styles.name}>{profile.name}</Text>
+                  <Text style={styles.position}>{profile.position}</Text>
                 </View>
               )}
-            </Formik>
-          </View>
+              <ProfileForm
+                keyboardHide={keyboardHide}
+                profile={profile}
+                setIsShowKeyboard={setIsShowKeyboard}
+              />
+            </View>
+          </ScrollView>
         </KeyboardAwareScrollView>
       </TouchableWithoutFeedback>
-    </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 export default ProfileScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    fontFamily: "Poppins-Regular",
-    paddingTop: Platform.OS === "ios" ? 50 : StatusBar.currentHeight,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    paddingHorizontal: 32,
-    minHeight: "100%",
-  },
-  scrollView: { width: "100%" },
-
   header: {
     position: "relative",
     width: "100%",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 50,
   },
 
   title: {
@@ -314,59 +165,5 @@ const styles = StyleSheet.create({
     textTransform: "capitalize",
     color: "#9795A4",
     marginTop: 3,
-  },
-
-  inputWrap: {
-    position: "relative",
-    width: "100%",
-    marginTop: 40,
-  },
-
-  label: {
-    fontWeight: "500",
-    fontSize: 14,
-    lineHeight: 21,
-    textTransform: "capitalize",
-    color: "#9795A4",
-  },
-  input: {
-    width: "100%",
-    borderBottomWidth: 1,
-    borderBottomColor: "#D7D7D7",
-    paddingVertical: 12,
-    color: "#1F1D1D",
-    fontStyle: "normal",
-    fontWeight: "500",
-    fontSize: 16,
-    lineHeight: 21,
-    textShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
-  },
-
-  profileSubmit: {
-    width: "100%",
-    backgroundColor: "#FFC612",
-    borderRadius: 20,
-    paddingVertical: 17,
-    marginTop: 30,
-    marginBottom: 37,
-  },
-
-  submitTitle: {
-    fontStyle: "normal",
-    fontWeight: "500",
-    fontSize: 18,
-    lineHeight: 27,
-    textTransform: "capitalize",
-    color: "#1F1D1D",
-    textAlign: "center",
-  },
-
-  errorMessage: {
-    position: "absolute",
-    top: 20,
-    left: 0,
-    fontWeight: "400",
-    fontSize: 16,
-    color: "#d52121",
   },
 });
